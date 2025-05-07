@@ -6,7 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AccountPage from './features/Account/AccountPage';
 import PostRoomPage from './features/MainPage/PostRoomPage';
 import ApartmentPage from './features/MainPage/ApartmentPage';
-import MyPostsPage from './features/MyPosts/MyPostsPage';
+import MyPostsPage from './features/Account/MyPostsPage';
 
 function App() {
   return (
