@@ -122,7 +122,7 @@ function EditPostPage() {
                             label="Floor"
                             name="floor"
                             type="text"
-                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                            slotProps={{ input: { inputMode: 'numeric', pattern: '[0-9]*' } }}
                             value={apartment.floor}
                             onChange={handleApartmentChange}
                             required
@@ -181,7 +181,7 @@ function EditPostPage() {
                     <Divider sx={{ mb: 2 }} />
 
                     {rooms.map((room, index) => (
-                        <Box key={index} sx={{ p: 2, backgroundColor: '#fffbe6', borderRadius: 2, mb: 2, boxShadow: 1, position: 'relative' }}>
+                        <Box key={room.id || index} sx={{ p: 2, backgroundColor: '#fffbe6', borderRadius: 2, mb: 2, boxShadow: 1, position: 'relative' }}>
                             <IconButton
                                 onClick={() => deleteRoom(index)}
                                 size="small"

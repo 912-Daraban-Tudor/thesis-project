@@ -79,32 +79,6 @@ function PostRoomPage() {
     }
   };
 
-  // const handleAddressSelect = (feature) => {
-  //   console.log('Selected feature:', feature);
-
-  //   if (!feature || !feature.features || feature.features.length === 0) {
-  //     return;
-  //   }
-
-  //   // Get the first feature from the results
-  //   const selectedFeature = feature.features[0];
-
-  //   if (!selectedFeature || !selectedFeature.geometry || !selectedFeature.geometry.coordinates) {
-  //     console.error('Invalid feature structure:', selectedFeature);
-  //     return;
-  //   }
-
-  //   const [lng, lat] = selectedFeature.geometry.coordinates;
-
-  //   setApartment(prev => ({
-  //     ...prev,
-  //     address: `${selectedFeature.properties.context.street.name}, nr. ${selectedFeature.properties.context.address.address_number}, ${selectedFeature.properties.context.place.name}`,
-  //     latitude: lat,
-  //     longitude: lng
-  //   }));
-
-  //   console.log('Selected address:', selectedFeature.place_name, 'Coordinates:', lat, lng);
-  // };
 
   const handleCloseNotification = () => {
     setNotification({ ...notification, open: false });

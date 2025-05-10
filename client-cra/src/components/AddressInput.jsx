@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Box, Typography, TextField } from '@mui/material';
 import { SearchBox } from '@mapbox/search-js-react';
 
@@ -44,7 +45,7 @@ function AddressInput({ value, onAddressSelect }) {
                 <Box
                     sx={{
                         flexGrow: 1,
-                        flexBasis: isSearchActive ? '100%' : hasAddress ? '50%' : '50%',
+                        flexBasis: isSearchActive ? '100%' : '50%',
                         transition: 'flex-basis 0.4s ease',
                     }}
                     onClick={handleClick}
@@ -121,5 +122,9 @@ function AddressInput({ value, onAddressSelect }) {
         </Box>
     );
 }
+AddressInput.propTypes = {
+    value: PropTypes.string.isRequired,
+    onAddressSelect: PropTypes.func.isRequired,
+};
 
 export default AddressInput;
