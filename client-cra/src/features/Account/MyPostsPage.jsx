@@ -107,7 +107,37 @@ function MyPostsPage() {
 
               return (
                 <React.Fragment key={location.id}>
-                  <Box sx={{ p: 2, backgroundColor: '#fefaf1', borderRadius: '8px' }}>
+                  <Box sx={{ 
+                      p: 2, 
+                      backgroundColor: '#fefaf1', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer', 
+                      position: 'relative',
+                      '&:hover': {backgroundColor: '#f4f0e8'}, }}
+                    onClick={() => navigate(`/edit/${location.id}`)}
+                  >
+                    <Button
+                      variant="contained"
+                      size="medium"
+                      sx={{
+                        position: 'absolute',
+                        boxShadow: 'none',
+                        top: 14,
+                        right: 6,
+                        color: '#4a7ebb',
+                        backgroundColor: '#cfe6f5',
+                        borderRadius: '6px',
+                        textTransform: 'none',
+                        fontWeight: 500, //one step above normal
+                        '&:hover': { backgroundColor: '#b3d9f0', boxShadow },
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(location.id);
+                      }}
+                    >
+                      Delete
+                    </Button>
                     <Typography variant="h6" sx={{ color: '#4a7ebb' }}>
                       {location.name}
                     </Typography>
@@ -161,22 +191,23 @@ function MyPostsPage() {
                     </List>
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                      <Button
+                      {/* <Button
                         variant="contained"
                         color="primary"
                         sx={{ backgroundColor: '#4a7ebb' }}
                         onClick={() => navigate(`/edit/${location.id}`)}
                       >
                         Edit
-                      </Button>
-                      <Button
-                        variant="outlined"
+                      </Button> */}
+                      {/* <Button
+                        variant="text"
                         color="secondary"
+                        size="small"
                         sx={{ borderColor: '#4a7ebb', color: '#4a7ebb' }}
-                        onClick={() => handleDelete(location.id)}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(location.id)}}
                       >
                         Delete
-                      </Button>
+                      </Button> */}
                     </Box>
                   </Box>
                   {index < locations.length - 1 && <Divider sx={{ my: 2 }} />}
