@@ -53,6 +53,7 @@ function MyPostsPage() {
         width: '100vw',
         overflow:'hidden',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
         boxSizing: 'border-box',
@@ -114,7 +115,7 @@ function MyPostsPage() {
                       cursor: 'pointer', 
                       position: 'relative',
                       '&:hover': {backgroundColor: '#f4f0e8'}, }}
-                    onClick={() => navigate(`/edit/${location.id}`)}
+                      onClick={() => navigate(`/edit-post/${location.id}`, { state: { apartment: location, rooms } })}
                   >
                     <Button
                       variant="contained"
@@ -129,7 +130,7 @@ function MyPostsPage() {
                         borderRadius: '6px',
                         textTransform: 'none',
                         fontWeight: 500, //one step above normal
-                        '&:hover': { backgroundColor: '#b3d9f0', boxShadow },
+                        '&:hover': { backgroundColor: '#b3d9f0', boxShadow: 'none' },
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
