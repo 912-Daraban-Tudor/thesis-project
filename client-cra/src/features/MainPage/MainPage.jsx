@@ -4,12 +4,14 @@ import TopNavBar from './TopNavBar';
 import MapView from './MapView';
 import { Fab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { MapProvider as MapboxProvider } from 'react-map-gl';
+import { MapProvider } from '../../context/MapContext';
 
 function MainPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
 
     if (!token) {
       navigate('/login');
@@ -17,20 +19,24 @@ function MainPage() {
   }, [navigate]);
 
   return (
-    <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <TopNavBar />
-      <div style={{ flex: 1, position: 'relative' }}>
-        <MapView />
-        <Fab
-          color="primary"
-          aria-label="post"
-          sx={{ position: 'absolute', bottom: 16, right: 16 }}
-          onClick={() => navigate('/post')}
-        >
-          <AddIcon />
-        </Fab>
-      </div>
-    </div>
+    <MapboxProvider>
+      <MapProvider>
+        <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <TopNavBar />
+          <div style={{ flex: 1, position: 'relative' }}>
+            <MapView />
+            <Fab
+              color="primary"
+              aria-label="post"
+              sx={{ position: 'absolute', bottom: 16, right: 16 }}
+              onClick={() => navigate('/post')}
+            >
+              <AddIcon />
+            </Fab>
+          </div>
+        </div>
+      </MapProvider>
+    </MapboxProvider>
   );
 }
 

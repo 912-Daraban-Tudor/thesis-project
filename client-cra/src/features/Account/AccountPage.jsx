@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
-import { TextField, Button, Avatar, Typography, MenuItem, Paper } from '@mui/material';
+import {
+  TextField,
+  Button,
+  Avatar,
+  Typography,
+  MenuItem,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Box
+} from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AccountPage() {
   const [userData, setUserData] = useState(null);
@@ -12,15 +27,14 @@ function AccountPage() {
   });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get('/api/auth/me');
-
         setUserData(response.data);
-        console.log('User data:', response.data, response.data.profile_picture_url);
         setFormData({
           username: response.data.username,
           gender: response.data.gender || '',
@@ -58,8 +72,22 @@ function AccountPage() {
         profile_picture_url: formData.profilePictureUrl,
       }));
       setEditMode(false);
+      toast.success('Account updated successfully.');
     } catch (error) {
       console.error('Error updating user data:', error);
+      toast.error('Failed to update account.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await axios.delete('/api/auth/me');
+      localStorage.removeItem('token');
+      toast.success('Account deleted successfully.');
+      setTimeout(() => navigate('/login'), 1000);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error('Failed to delete account.');
     }
   };
 
@@ -82,7 +110,7 @@ function AccountPage() {
         boxSizing: 'border-box',
       }}
     >
-
+      <ToastContainer />
       <Paper
         elevation={3}
         style={{
@@ -93,25 +121,45 @@ function AccountPage() {
           textAlign: 'left',
           boxSizing: 'border-box',
           overflowWrap: 'break-word',
+          position: 'relative',
         }}
       >
-        <Button
-          variant="outlined"
-          color="secondary"
+        <Box
           sx={{
-            position: 'absolute',
-            top: '1rem',
-            left: '1rem',
-            borderColor: '#4a7ebb',
-            color: '#4a7ebb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 3,
+            width: '100%',
+            flexWrap: 'wrap',
+            gap: 2,
           }}
-          onClick={() => navigate(-1)}
         >
-          Back
-        </Button>
-        <Typography variant="h4" gutterBottom sx={{ color: '#4a7ebB' }}>
-          My Account
-        </Typography>
+          <Button
+            variant="outlined"
+            color="secondary"
+            sx={{
+              borderColor: '#4a7ebb',
+              color: '#4a7ebb',
+              textTransform: 'none',
+              fontWeight: 500,
+            }}
+            onClick={() => navigate(-1)}
+          >
+            Back
+          </Button>
+
+          <Typography
+            variant="h4"
+            sx={{
+              color: '#4a7ebb',
+              flexGrow: 1,
+              textAlign: { xs: 'center', sm: 'left' },
+            }}
+          >
+            My Account
+          </Typography>
+        </Box>
 
         <Avatar
           src={editMode ? formData.profilePictureUrl : userData.profile_picture_url}
@@ -175,6 +223,15 @@ function AccountPage() {
             >
               Cancel
             </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ mt: 2, borderColor: '#d32f2f', color: '#d32f2f' }}
+              fullWidth
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              Delete Account
+            </Button>
           </form>
         ) : (
           <div>
@@ -191,8 +248,41 @@ function AccountPage() {
             >
               Edit Account
             </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              sx={{ mt: 1, borderColor: '#d32f2f', color: '#d32f2f' }}
+              fullWidth
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              Delete Account
+            </Button>
           </div>
         )}
+
+        {/* Delete confirmation dialog */}
+        <Dialog
+          open={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+        >
+          <DialogTitle>Confirm Account Deletion</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete your account? This action is <strong>irreversible</strong>.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDeleteDialog(false)} sx={{ color: '#4a7ebb' }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteAccount}
+              color="error"
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </div>
   );
