@@ -7,6 +7,7 @@ import AccountPage from './features/Account/AccountPage';
 import PostRoomPage from './features/MainPage/PostRoomPage';
 import ApartmentPage from './features/MainPage/ApartmentPage';
 import MyPostsPage from './features/Account/MyPostsPage';
+import EditPostPage from './features/Account/EditPostPage';
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MyPostsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+          path="/edit-post/:id" 
+          element={
+            <ProtectedRoute>
+              <EditPostPage />
             </ProtectedRoute>
           }
         />

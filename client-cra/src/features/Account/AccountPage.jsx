@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
-import { TextField, Button, Avatar, Typography, MenuItem, Paper, Fab } from '@mui/material';
+import { TextField, Button, Avatar, Typography, MenuItem, Paper } from '@mui/material';
 
 function AccountPage() {
   const [userData, setUserData] = useState(null);
@@ -11,12 +12,13 @@ function AccountPage() {
   });
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get('/api/auth/me');
-        
+
         setUserData(response.data);
         console.log('User data:', response.data, response.data.profile_picture_url);
         setFormData({
@@ -68,19 +70,19 @@ function AccountPage() {
 
   return (
     <div
-    style={{
+      style={{
         backgroundColor: '#fefaf1',
         height: '100vh',
         width: '100vw',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden', 
+        overflow: 'hidden',
         padding: '1rem',
         boxSizing: 'border-box',
       }}
     >
-    
+
       <Paper
         elevation={3}
         style={{
@@ -93,6 +95,20 @@ function AccountPage() {
           overflowWrap: 'break-word',
         }}
       >
+        <Button
+          variant="outlined"
+          color="secondary"
+          sx={{
+            position: 'absolute',
+            top: '1rem',
+            left: '1rem',
+            borderColor: '#4a7ebb',
+            color: '#4a7ebb',
+          }}
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </Button>
         <Typography variant="h4" gutterBottom sx={{ color: '#4a7ebB' }}>
           My Account
         </Typography>

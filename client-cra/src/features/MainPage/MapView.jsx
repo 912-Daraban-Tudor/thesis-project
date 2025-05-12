@@ -2,8 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import ReactMapGL, { NavigationControl, Marker, Popup } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from '../../api/axiosInstance';
-import { Avatar, Typography, Button, Fab } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Avatar, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const MapView = () => {
@@ -99,7 +98,7 @@ const MapView = () => {
                 maxWidth: '200px',
               }}
             >
-              
+
               <div
                 style={{
                   position: 'absolute',

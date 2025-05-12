@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import axios from '../../api/axiosInstance';
-import { 
-  TextField, 
-  Checkbox, 
-  FormControlLabel, 
-  Button, 
-  Typography, 
-  Card, 
-  CardContent, 
-  IconButton, 
+import {
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  Typography,
+  Card,
+  CardContent,
+  IconButton,
   Divider,
-  Box,
   MenuItem,
   FormControl,
   InputLabel,
@@ -21,7 +20,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
-import { SearchBox } from '@mapbox/search-js-react';
+import AddressInput from '../../components/AddressInput';
 
 function PostRoomPage() {
   const [apartment, setApartment] = useState({
@@ -80,32 +79,6 @@ function PostRoomPage() {
     }
   };
 
-  const handleAddressSelect = (feature) => {
-    console.log('Selected feature:', feature);
-    
-    if (!feature || !feature.features || feature.features.length === 0) {
-      return;
-    }
-
-    // Get the first feature from the results
-    const selectedFeature = feature.features[0];
-    
-    if (!selectedFeature || !selectedFeature.geometry || !selectedFeature.geometry.coordinates) {
-      console.error('Invalid feature structure:', selectedFeature);
-      return;
-    }
-    
-    const [lng, lat] = selectedFeature.geometry.coordinates;
-    
-    setApartment(prev => ({
-      ...prev,
-      address: `${selectedFeature.properties.context.street.name}, nr. ${selectedFeature.properties.context.address.address_number}, ${selectedFeature.properties.context.place.name}`,
-      latitude: lat,
-      longitude: lng
-    }));
-    
-    console.log('Selected address:', selectedFeature.place_name, 'Coordinates:', lat, lng);
-  };
 
   const handleCloseNotification = () => {
     setNotification({ ...notification, open: false });
@@ -144,13 +117,27 @@ function PostRoomPage() {
   return (
     <div style={{ backgroundColor: '#fff7ee', minHeight: '100vh', padding: '2rem', display: 'flex', justifyContent: 'center' }}>
       <Card style={{ width: '100%', maxWidth: '1300px', padding: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          sx={{
+            position: 'relative',
+            top: '0rem',
+            left: '0rem',
+            borderColor: '#4a7ebb',
+            color: '#4a7ebb',
+          }}
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </Button>
         <Typography variant="h4" gutterBottom style={{ color: '#333' }}>Post an Apartment</Typography>
-        
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
             <Typography variant="h6">Apartment Details</Typography>
             <Divider />
-            
+
             <div style={{ marginTop: '1rem' }}>
               <TextField
                 label="Name"
@@ -163,40 +150,19 @@ function PostRoomPage() {
                 style={{ marginBottom: '1rem' }}
               />
 
-              <Typography variant="body1" style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>Search Address</Typography>
-              <div style={{ marginBottom: '1rem' }}>
-                <SearchBox
-                  accessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-                  options={{
-                    country: 'ro',
-                    types: 'address',
-                    // autocomplete: true,
-                    limit: 3,
-                    language: 'en',
-                    proximity: '23.6,46.76667'
-                  }}
-                  onRetrieve={handleAddressSelect}
-                  //onSelect={handleAddressSelect}
-                />
-              </div>
-
-              <TextField
-                label="Selected Address"
-                variant="standard"
+              <AddressInput
                 value={apartment.address}
-                disabled
-                fullWidth
-                style={{ 
-                  marginBottom: '1rem',
-                  backgroundColor: apartment.address ? '#f9f9f9' : 'transparent'
-                }}
-                InputProps={{
-                  style: {
-                    color: 'black',
-                    opacity: 1
-                  }
-                }}
+                editable={true}
+                onAddressSelect={(data) =>
+                  setApartment((prev) => ({
+                    ...prev,
+                    address: data.address,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                  }))
+                }
               />
+
 
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
                 <TextField
@@ -263,23 +229,23 @@ function PostRoomPage() {
             <Divider style={{ marginBottom: '1rem' }} />
 
             {rooms.map((room, index) => (
-              <Card key={index} style={{ 
-                backgroundColor: '#fffbe6', 
+              <Card key={index} style={{
+                backgroundColor: '#fffbe6',
                 marginBottom: '1.5rem',
                 borderLeft: '4px solid #f0c040'
               }}>
                 <CardContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1" style={{ fontWeight: 500 }}>Room {index + 1}</Typography>
-                    <IconButton 
-                      onClick={() => deleteRoom(index)} 
-                      color="error" 
+                    <IconButton
+                      onClick={() => deleteRoom(index)}
+                      color="error"
                       size="small"
                     >
                       <DeleteIcon />
                     </IconButton>
                   </div>
-                  
+
                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <TextField
                       label="Price (€)"
@@ -292,7 +258,7 @@ function PostRoomPage() {
                       required
                       style={{ flex: 1, minWidth: '120px' }}
                     />
-                    
+
                     <FormControl variant="standard" style={{ flex: 1, minWidth: '150px' }}>
                       <InputLabel id={`sex-preference-label-${index}`}>Sex preference</InputLabel>
                       <Select
@@ -307,7 +273,7 @@ function PostRoomPage() {
                       </Select>
                     </FormControl>
                   </div>
-                  
+
                   <TextField
                     label="Description"
                     name="description"
@@ -318,13 +284,13 @@ function PostRoomPage() {
                     multiline
                     rows={2}
                   />
-                  
+
                   <FormControlLabel
                     control={
-                      <Checkbox 
-                        checked={room.balcony} 
-                        onChange={(e) => handleRoomChange(index, e)} 
-                        name="balcony" 
+                      <Checkbox
+                        checked={room.balcony}
+                        onChange={(e) => handleRoomChange(index, e)}
+                        name="balcony"
                       />
                     }
                     label="Has balcony"
@@ -333,36 +299,36 @@ function PostRoomPage() {
               </Card>
             ))}
 
-            <Button 
-              variant="outlined" 
-              startIcon={<AddIcon />} 
-              onClick={addRoom} 
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={addRoom}
               style={{ marginBottom: '1.5rem' }}
             >
               Add Another Room
             </Button>
           </div>
 
-          <Button 
-            variant="contained" 
-            color="primary" 
-            type="submit" 
-            size="large" 
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            size="large"
             style={{ padding: '0.75rem' }}
           >
             Post Apartment & Rooms
           </Button>
         </form>
       </Card>
-      
-      <Snackbar 
-        open={notification.open} 
-        autoHideDuration={6000} 
+
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
         onClose={handleCloseNotification}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={handleCloseNotification} 
+        <Alert
+          onClose={handleCloseNotification}
           severity={notification.severity}
           variant="filled"
         >

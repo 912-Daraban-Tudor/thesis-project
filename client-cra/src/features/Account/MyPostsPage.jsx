@@ -51,8 +51,9 @@ function MyPostsPage() {
         backgroundColor: '#fefaf1',
         minHeight: '100vh',
         width: '100vw',
-        overflow:'hidden',
+        overflow: 'hidden',
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
         boxSizing: 'border-box',
@@ -107,14 +108,15 @@ function MyPostsPage() {
 
               return (
                 <React.Fragment key={location.id}>
-                  <Box sx={{ 
-                      p: 2, 
-                      backgroundColor: '#fefaf1', 
-                      borderRadius: '8px', 
-                      cursor: 'pointer', 
-                      position: 'relative',
-                      '&:hover': {backgroundColor: '#f4f0e8'}, }}
-                    onClick={() => navigate(`/edit/${location.id}`)}
+                  <Box sx={{
+                    p: 2,
+                    backgroundColor: '#fefaf1',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    '&:hover': { backgroundColor: '#f4f0e8' },
+                  }}
+                    onClick={() => navigate(`/edit-post/${location.id}`, { state: { apartment: location, rooms } })}
                   >
                     <Button
                       variant="contained"
@@ -129,7 +131,7 @@ function MyPostsPage() {
                         borderRadius: '6px',
                         textTransform: 'none',
                         fontWeight: 500, //one step above normal
-                        '&:hover': { backgroundColor: '#b3d9f0', boxShadow },
+                        '&:hover': { backgroundColor: '#b3d9f0', boxShadow: 'none' },
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -189,26 +191,6 @@ function MyPostsPage() {
                         </ListItem>
                       ))}
                     </List>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                      {/* <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{ backgroundColor: '#4a7ebb' }}
-                        onClick={() => navigate(`/edit/${location.id}`)}
-                      >
-                        Edit
-                      </Button> */}
-                      {/* <Button
-                        variant="text"
-                        color="secondary"
-                        size="small"
-                        sx={{ borderColor: '#4a7ebb', color: '#4a7ebb' }}
-                        onClick={(e) => { e.stopPropagation(); handleDelete(location.id)}}
-                      >
-                        Delete
-                      </Button> */}
-                    </Box>
                   </Box>
                   {index < locations.length - 1 && <Divider sx={{ my: 2 }} />}
                 </React.Fragment>
