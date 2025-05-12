@@ -113,7 +113,15 @@ function EditPostPage() {
 
                     <AddressInput
                         value={apartment.address}
-                        editable={false}
+                        editable={true}
+                        onAddressSelect={(data) =>
+                            setApartment((prev) => ({
+                                ...prev,
+                                address: data.address,
+                                latitude: data.latitude,
+                                longitude: data.longitude,
+                            }))
+                        }
                     />
 
 

@@ -37,7 +37,7 @@ function PostRoomPage() {
   });
 
   const [rooms, setRooms] = useState([
-    { price: '', description: '', balcony: false, sex_preference: '' }
+    { id: Date.now(), price: '', description: '', balcony: false, sex_preference: '' }
   ]);
 
   const [notification, setNotification] = useState({
@@ -64,7 +64,7 @@ function PostRoomPage() {
   };
 
   const addRoom = () => {
-    setRooms(prev => [...prev, { price: '', description: '', balcony: false, sex_preference: '' }]);
+    setRooms(prev => [...prev, { id: Date.now(), price: '', description: '', balcony: false, sex_preference: '' }]);
   };
 
   const deleteRoom = (index) => {
@@ -229,7 +229,7 @@ function PostRoomPage() {
             <Divider style={{ marginBottom: '1rem' }} />
 
             {rooms.map((room, index) => (
-              <Card key={index} style={{
+              <Card key={room.id} style={{
                 backgroundColor: '#fffbe6',
                 marginBottom: '1.5rem',
                 borderLeft: '4px solid #f0c040'
