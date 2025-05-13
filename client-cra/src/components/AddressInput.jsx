@@ -11,27 +11,64 @@ function AddressInput({ value, onAddressSelect }) {
         setTimeout(() => setIsSearchActive(false), 150); // give time for selection to register
     };
 
-    const handleAddressSelect = (feature) => {
+    const handleAddressSelect = async (feature) => {
         if (!feature || !feature.features || feature.features.length === 0) return;
-        const selected = feature.features[0];
-        console.log('Selected address:', selected);
-        if (!selected.geometry || !selected.geometry.coordinates) return;
-        if (!selected.properties || !selected.properties.context) return;
-        if (
-            !selected.properties.context.street ||
-            !selected.properties.context.address ||
-            !selected.properties.context.place
-        )
-            return;
 
-        const [lng, lat] = selected.geometry.coordinates;
-        onAddressSelect({
-            address: `${selected.properties.context.street.name}, nr. ${selected.properties.context.address.address_number}, ${selected.properties.context.place.name}`,
-            latitude: lat,
-            longitude: lng,
+        const selected = feature.features[0];
+        const { geometry, properties } = selected;
+
+        if (!geometry || !geometry.coordinates) return;
+        if (!properties || !properties.context) return;
+
+        const context = properties.context;
+        const street = context.street?.name;
+        const addressNumber = context.address?.address_number;
+        const place = context.place?.name;
+
+        if (!street || !addressNumber || !place) return;
+
+
+        // Construct the structured address
+        const address = `${street}, nr. ${addressNumber}, ${place}`;
+
+        // Prepare structured input parameters
+        const structuredParams = new URLSearchParams({
+            address_number: addressNumber,
+            street: street,
+            place: place,
+            country: 'RO',
+            autocomplete: 'false',
+            access_token: process.env.REACT_APP_MAPBOX_TOKEN,
         });
-        setIsSearchActive(false);
+
+        // Optional: Add bounding box and proximity for Cluj-Napoca
+        structuredParams.append('bbox', '23.36,46.7,23.77,46.81'); // Cluj-Napoca bounding box
+        structuredParams.append('proximity', '23.6,46.76667'); // Cluj-Napoca center
+
+        try {
+            const response = await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${structuredParams.toString()}`);
+            const data = await response.json();
+
+            if (!data.features || data.features.length === 0) {
+                console.warn('No geocoding results found.');
+                return;
+            }
+
+            const result = data.features[0];
+            const [resultLng, resultLat] = result.geometry.coordinates;
+
+            onAddressSelect({
+                address,
+                latitude: resultLat,
+                longitude: resultLng,
+            });
+
+            setIsSearchActive(false);
+        } catch (error) {
+            console.error('Geocoding error:', error);
+        }
     };
+
 
     return (
         <Box sx={{ mb: 2, width: '100%' }}>

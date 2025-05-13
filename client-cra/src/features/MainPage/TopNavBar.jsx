@@ -40,9 +40,20 @@ function TopNavBar() {
     handleProfileClose();
   };
 
+  const handleHomeClick = () => {
+    navigate('/main');
+    handleMenuClose();
+  }
+
   const handleMyPostsClick = () => {
     navigate('/my-posts');
     handleProfileClose();
+  };
+
+  const handleLogoutClick = () => {
+    localStorage.removeItem('token');
+    handleProfileClose();
+    navigate('/login');
   };
 
   return (
@@ -63,7 +74,7 @@ function TopNavBar() {
           open={Boolean(anchorElMenu)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={() => { console.log('Home clicked'); handleMenuClose(); }}>Home</MenuItem>
+          <MenuItem onClick={handleHomeClick}>Home</MenuItem>
           <MenuItem onClick={() => { console.log('Rooms clicked'); handleMenuClose(); }}>Rooms</MenuItem>
           <MenuItem onClick={() => { console.log('About clicked'); handleMenuClose(); }}>About</MenuItem>
         </Menu>
@@ -87,8 +98,7 @@ function TopNavBar() {
         >
           <MenuItem onClick={handleProfileClick}>My Account</MenuItem>
           <MenuItem onClick={handleMyPostsClick}>My Posts</MenuItem>
-          <MenuItem onClick={() => { console.log('Settings clicked'); handleProfileClose(); }}>Settings</MenuItem>
-          <MenuItem onClick={() => { console.log('Logout clicked'); handleProfileClose(); }}>Logout</MenuItem>
+          <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
         </Menu>
       </Toolbar>
     </AppBar>
