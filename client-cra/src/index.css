@@ -14,6 +14,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.mapboxgl-popup-content {
+  background-color: #c12525 !important;
+  /* dark red */
+  color: white !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 12px !important;
+  max-width: 240px;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #b71c1c !important;
+  /* match popup bg */
+}
+
 a {
   font-weight: 500;
   color: #646cff;

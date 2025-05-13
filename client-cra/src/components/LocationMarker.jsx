@@ -1,0 +1,130 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Marker, Popup } from 'react-map-gl';
+import { Avatar, Typography, Button, Chip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+const LocationMarker = ({ location, selected, onClick }) => {
+    const navigate = useNavigate();
+
+
+    const price = Number(location.price);
+    const isSingleRoom = Number(location.room_count) === 1;
+
+    const isFourDigitPrice = price > 999;
+    const isThreeDigitPrice = price > 99;
+    const isTwoDigitPrice = price > 9;
+
+    let avatarWidth;
+    if (isSingleRoom) {
+        if (isFourDigitPrice) avatarWidth = 39;
+        else if (isThreeDigitPrice) avatarWidth = 34;
+        else if (isTwoDigitPrice) avatarWidth = 30;
+        else avatarWidth = 30;
+    } else {
+        avatarWidth = 28;
+    }
+
+    const avatarHeight = 28;
+    const fontSize = isSingleRoom ? '0.75rem' : '1.1rem';
+
+    return (
+        <>
+            {!selected && (
+                <Marker
+                    key={location.id}
+                    latitude={location.latitude}
+                    longitude={location.longitude}
+                    anchor="bottom"
+                >
+                    <Avatar
+                        sx={{
+                            bgcolor: 'red',
+                            width: avatarWidth,
+                            height: avatarHeight,
+                            fontSize,
+                            fontWeight: 'bold',
+                            border: '2px solid white',
+                            cursor: 'pointer',
+                        }}
+                        onClick={(e) => {
+                            if (e?.nativeEvent?.stopImmediatePropagation) e.nativeEvent.stopImmediatePropagation();
+                            onClick(location);
+                        }}
+                    >
+                        {isSingleRoom ? `${location.price}€` : location.room_count}
+                    </Avatar>
+                </Marker>
+            )}
+
+            {selected && (
+                <Popup
+                    longitude={location.longitude}
+                    latitude={location.latitude}
+                    closeOnClick={true}
+                    onClose={() => onClick(null)}
+                    anchor="bottom"
+                    offset={[0, -10]}
+                >
+                    <div>
+                        <Typography variant="subtitle1" style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                            {location.name}
+                        </Typography>
+
+                        {location.has_centrala && (
+                            <Chip label="Heating" size="small" sx={{ bgcolor: '#ffcdd2', color: 'black', mr: 1, mb: 1 }} />
+                        )}
+                        {location.has_parking && (
+                            <Chip label="Parking" size="small" sx={{ bgcolor: '#ffcdd2', color: 'black', mr: 1, mb: 1 }} />
+                        )}
+
+                        <Typography variant="body2" style={{ marginBottom: '0.25rem' }}>
+                            <strong>Total Rooms:</strong> {location.number_of_rooms}
+                        </Typography>
+
+                        <Typography variant="body2" style={{ marginBottom: '0.75rem' }}>
+                            {isSingleRoom
+                                ? `Price: ${location.price}€`
+                                : `Available Rooms: ${location.room_count}`}
+                        </Typography>
+
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                onClick={() => navigate(`/apartment/${location.id}`)}
+                                sx={{
+                                    backgroundColor: '#8b0000',
+                                    '&:hover': { backgroundColor: '#6a0000' },
+                                    color: 'white',
+                                    fontSize: '0.75rem',
+                                    padding: '4px 12px',
+                                }}
+                            >
+                                View Details
+                            </Button>
+                        </div>
+                    </div>
+                </Popup>
+            )}
+        </>
+    );
+};
+
+LocationMarker.propTypes = {
+    location: PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+        room_count: PropTypes.number.isRequired,
+        price: PropTypes.number,
+        name: PropTypes.string.isRequired,
+        has_centrala: PropTypes.bool,
+        has_parking: PropTypes.bool,
+        number_of_rooms: PropTypes.number,
+    }).isRequired,
+    selected: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired,
+};
+
+export default LocationMarker;
