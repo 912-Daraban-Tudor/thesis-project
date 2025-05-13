@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import pool from '../models/db.js'; 
+import pool from '../models/db.js';
 
 export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    
+
     if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -47,101 +47,125 @@ export const registerUser = async (req, res) => {
 
 
 export const loginUser = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-  
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required." });
-      }
-  
-      const userResult = await pool.query(
-        'SELECT * FROM users WHERE email = $1',
-        [email]
-      );
-  
-      if (userResult.rows.length === 0) {
-        return res.status(400).json({ message: "Invalid credentials." });
-      }
-  
-      const user = userResult.rows[0];
-  
-      const isMatch = await bcrypt.compare(password, user.password_hash);
-  
-      if (!isMatch) {
-        return res.status(400).json({ message: "Invalid credentials." });
-      }
-  
-      const token = jwt.sign(
-        { id: user.id, username: user.username , role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '4h' }
-      );
-  
-      res.json({ token });
-  
-    } catch (error) {
-      console.error("Error in loginUser:", error);
-      res.status(500).json({ message: "Server error. Please try again." });
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
     }
-  };
-  
 
-  export const getUserInfo = async (req, res) => {
-    try {
-      const userId = req.user.id; // Get user ID from the token
-  
-      const userResult = await pool.query(
-        'SELECT id, username, email, created_at, gender, profile_picture_url FROM users WHERE id = $1',
-        [userId]
-      );
+    const userResult = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
 
-      if (userResult.rows.length === 0) {
-        return res.status(404).json({ message: "User not found." });
-      }
-  
-      res.json(userResult.rows[0]);
-  
-    } catch (error) {
-      console.error("Error in getUserInfo:", error);
-      res.status(500).json({ message: "Server error. Please try again." });
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid credentials." });
     }
-  };
 
+    const user = userResult.rows[0];
 
-  export const updateUserInfo = async (req, res) => {
-    try {
-      const userId = req.user.id; 
-      const { username, profilePictureUrl, gender } = req.body;
-  
-      if (!username) {
-        return res.status(400).json({ message: "Username is required." });
-      }
-  
-      const allowedGenders = ['male', 'female', 'other', null, undefined];
-      if (!allowedGenders.includes(gender)) {
-        return res.status(400).json({ message: "Invalid gender value." });
-      }
-  
-      // Check if username is taken by another user
-      const existingUser = await pool.query(
-        'SELECT id FROM users WHERE username = $1 AND id <> $2',
-        [username, userId]
-      );
-  
-      if (existingUser.rows.length > 0) {
-        return res.status(400).json({ message: "Username already in use by another account." });
-      }
-      console.log(username, gender, profilePictureUrl);
-      // Update user info
-      await pool.query(
-        'UPDATE users SET username = $1, gender = $2, profile_picture_url = $3 WHERE id = $4',
-        [username, gender || null, profilePictureUrl, userId]
-      );
-      
-      res.json({ message: "User info updated successfully." });
-    } catch (error) {
-      console.error("Error in updateUserInfo:", error);
-      res.status(500).json({ message: "Server error. Please try again." });
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials." });
     }
-  };
-  
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '4h' }
+    );
+
+    res.json({ token });
+
+  } catch (error) {
+    console.error("Error in loginUser:", error);
+    res.status(500).json({ message: "Server error. Please try again." });
+  }
+};
+
+
+export const getUserInfo = async (req, res) => {
+  try {
+    const userId = req.user.id; // Get user ID from the token
+
+    const userResult = await pool.query(
+      'SELECT id, username, email, created_at, gender, profile_picture_url FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.json(userResult.rows[0]);
+
+  } catch (error) {
+    console.error("Error in getUserInfo:", error);
+    res.status(500).json({ message: "Server error. Please try again." });
+  }
+};
+
+export const getPublicUserInfo = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const userResult = await pool.query(
+      'SELECT id, username, gender, profile_picture_url, created_at  FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.json(userResult.rows[0]);
+
+  } catch (error) {
+    console.error("Error in getPublicUserInfo:", error);
+    res.status(500).json({ message: "Server error. Please try again." });
+  }
+};
+
+
+export const updateUserInfo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { username, profilePictureUrl, gender } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ message: "Username is required." });
+    }
+
+    const allowedGenders = ['male', 'female', 'other', null, undefined];
+    if (!allowedGenders.includes(gender)) {
+      return res.status(400).json({ message: "Invalid gender value." });
+    }
+
+    // Check if username is taken by another user
+    const existingUser = await pool.query(
+      'SELECT id FROM users WHERE username = $1 AND id <> $2',
+      [username, userId]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ message: "Username already in use by another account." });
+    }
+    console.log(username, gender, profilePictureUrl);
+    // Update user info
+    await pool.query(
+      'UPDATE users SET username = $1, gender = $2, profile_picture_url = $3 WHERE id = $4',
+      [username, gender || null, profilePictureUrl, userId]
+    );
+
+    res.json({ message: "User info updated successfully." });
+  } catch (error) {
+    console.error("Error in updateUserInfo:", error);
+    res.status(500).json({ message: "Server error. Please try again." });
+  }
+};

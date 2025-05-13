@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
 import {
   TextField,
@@ -19,6 +19,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function AccountPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isMe = !id;
+
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
@@ -28,18 +32,23 @@ function AccountPage() {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('/api/auth/me');
+        const response = isMe
+          ? await axios.get('/api/auth/me')
+          : await axios.get(`/api/auth/${id}`);
+
         setUserData(response.data);
-        setFormData({
-          username: response.data.username,
-          gender: response.data.gender || '',
-          profilePictureUrl: response.data.profile_picture_url || '',
-        });
+
+        if (isMe) {
+          setFormData({
+            username: response.data.username,
+            gender: response.data.gender || '',
+            profilePictureUrl: response.data.profile_picture_url || '',
+          });
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -48,7 +57,7 @@ function AccountPage() {
     };
 
     fetchUserData();
-  }, []);
+  }, [id, isMe]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -157,17 +166,17 @@ function AccountPage() {
               textAlign: { xs: 'center', sm: 'left' },
             }}
           >
-            My Account
+            {isMe ? 'My Account' : `${userData.username}'s Profile`}
           </Typography>
         </Box>
 
         <Avatar
-          src={editMode ? formData.profilePictureUrl : userData.profile_picture_url}
-          alt={formData.username}
+          src={isMe && editMode ? formData.profilePictureUrl : userData.profile_picture_url}
+          alt={userData.username}
           sx={{ width: 100, height: 100, margin: '1rem auto' }}
         />
 
-        {editMode ? (
+        {isMe && editMode ? (
           <form onSubmit={handleSubmit}>
             <TextField
               label="Username"
@@ -237,30 +246,33 @@ function AccountPage() {
           <div>
             <p><strong>Username:</strong> {userData.username}</p>
             <p><strong>Gender:</strong> {userData.gender || 'Not specified'}</p>
-            <p><strong>Email:</strong> {userData.email}</p>
+            {isMe && <p><strong>Email:</strong> {userData.email}</p>}
             <p><strong>Joined:</strong> {formattedDate}</p>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2, backgroundColor: '#4a7ebb' }}
-              fullWidth
-              onClick={() => setEditMode(true)}
-            >
-              Edit Account
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              sx={{ mt: 1, borderColor: '#d32f2f', color: '#d32f2f' }}
-              fullWidth
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              Delete Account
-            </Button>
+            {isMe && (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 2, backgroundColor: '#4a7ebb' }}
+                  fullWidth
+                  onClick={() => setEditMode(true)}
+                >
+                  Edit Account
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ mt: 1, borderColor: '#d32f2f', color: '#d32f2f' }}
+                  fullWidth
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  Delete Account
+                </Button>
+              </>
+            )}
           </div>
         )}
 
-        {/* Delete confirmation dialog */}
         <Dialog
           open={showDeleteDialog}
           onClose={() => setShowDeleteDialog(false)}

@@ -33,6 +33,14 @@ function App() {
             }
           />
           <Route
+            path="/account/:id"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/my-posts"
             element={
               <ProtectedRoute>
