@@ -1,26 +1,23 @@
+// TopNavBar.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
   IconButton,
-  Typography,
   Menu,
   MenuItem,
-  InputBase,
   Box,
-  Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchBoxInput from '../../components/SearchBoxInput';
 
 function TopNavBar() {
   const navigate = useNavigate();
 
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [anchorElProfile, setAnchorElProfile] = useState(null);
-  const [searchValue, setSearchValue] = useState('');
 
   const handleMenuOpen = (event) => {
     setAnchorElMenu(event.currentTarget);
@@ -48,13 +45,6 @@ function TopNavBar() {
     handleProfileClose();
   };
 
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    console.log('Search:', searchValue);
-    // later connect search
-  };
-
   return (
     <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
       <Toolbar>
@@ -79,33 +69,7 @@ function TopNavBar() {
         </Menu>
 
         <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-          <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center' }}>
-            <InputBase
-              placeholder="Search for rooms…"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              sx={{
-                color: 'inherit',
-                backgroundColor: '#555',
-                px: 1,
-                borderRadius: '4px 0 0 4px',
-                height: '36px',
-                width: { xs: '50%', sm: '300px' }
-              }}
-            />
-            <Button
-              type="submit"
-              sx={{
-                backgroundColor: '#777',
-                color: 'white',
-                borderRadius: '0 4px 4px 0',
-                height: '36px',
-                minWidth: '40px'
-              }}
-            >
-              <SearchIcon />
-            </Button>
-          </form>
+          <SearchBoxInput />
         </Box>
 
         <IconButton

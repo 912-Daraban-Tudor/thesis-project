@@ -260,3 +260,37 @@ export const deleteLocationById = async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 };
+
+// locationController.js
+export const filterLocationsNearby = async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat);
+    const lng = parseFloat(req.query.lng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      return res.status(400).json({ message: 'Latitude and longitude must be numbers.' });
+    }
+
+
+    if (!lat || !lng) {
+      return res.status(400).json({ message: 'Latitude and longitude are required.' });
+    }
+
+    const result = await pool.query('SELECT * FROM locations');
+    const all = result.rows;
+
+    const filtered = all.filter(loc => {
+      const dx = 111.32 * (loc.latitude - lat);
+      const dy = 40075 * Math.cos((lat * Math.PI) / 180) * (loc.longitude - lng) / 360;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= 1;
+    });
+
+    const final = filtered.length >= 2 ? filtered : all;
+
+    res.json(final);
+  } catch (err) {
+    console.error('Error filtering locations:', err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
@@ -19,11 +20,15 @@ function ProtectedRoute({ children }) {
       return <Navigate to="/login" replace />;
     }
   } catch (error) {
+    console.error('Error decoding token:', error);
     localStorage.removeItem('token');
     return <Navigate to="/login" replace />;
   }
 
   return children;
 }
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default ProtectedRoute;
