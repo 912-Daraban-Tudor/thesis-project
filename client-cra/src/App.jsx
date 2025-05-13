@@ -8,11 +8,11 @@ import PostRoomPage from './features/MainPage/PostRoomPage';
 import ApartmentPage from './features/MainPage/ApartmentPage';
 import MyPostsPage from './features/Account/MyPostsPage';
 import EditPostPage from './features/Account/EditPostPage';
-import { MapProvider } from './context/MapContext';
+import { MapProvider as MapboxProvider } from 'react-map-gl';
 function App() {
   return (
     <Router>
-      <MapProvider>
+      <MapboxProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -67,7 +67,7 @@ function App() {
 
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </MapProvider>
+      </MapboxProvider>
     </Router>
   );
 }

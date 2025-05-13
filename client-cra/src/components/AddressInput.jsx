@@ -14,6 +14,7 @@ function AddressInput({ value, onAddressSelect }) {
     const handleAddressSelect = (feature) => {
         if (!feature || !feature.features || feature.features.length === 0) return;
         const selected = feature.features[0];
+        console.log('Selected address:', selected);
         if (!selected.geometry || !selected.geometry.coordinates) return;
         if (!selected.properties || !selected.properties.context) return;
         if (

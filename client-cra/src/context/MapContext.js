@@ -17,8 +17,9 @@ export const MapProvider = ({ children }) => {
         viewState, setViewState,
         locations, setLocations,
         selectedLocation, setSelectedLocation,
-    }), [viewState, locations, selectedLocation]);
 
+    }), [viewState, locations, selectedLocation]);
+    console.log('MapProvider contextValue:', contextValue);
     return (
         <MapContext.Provider value={contextValue}>
             {children}

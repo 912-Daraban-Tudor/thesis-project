@@ -1,49 +1,72 @@
-// SearchBoxInput.jsx
+// src/components/SearchBoxInput.jsx
 import React, { useState } from 'react';
 import { InputBase, Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 import { useMap } from 'react-map-gl';
 import { useMapContext } from '../context/MapContext';
 import axios from '../api/axiosInstance';
 
 const SearchBoxInput = () => {
     const [query, setQuery] = useState('');
-    const { current: map } = useMap().mainMap || {};
+    const [isSearching, setIsSearching] = useState(false); // whether search was successful
     const { setLocations } = useMapContext();
 
+    const { mainMap } = useMap();
+    let map;
+
+    try {
+        map = mainMap?.getMap();
+    } catch (e) {
+        console.warn('⚠️ Failed to get map instance:', e);
+        map = null;
+    }
+
+    const token = process.env.REACT_APP_MAPBOX_TOKEN;
+
     const handleSubmit = async (e) => {
-        //console.log(query);
         e.preventDefault();
-        if (!query || !map) return;
+        console.log('🔍 Submitted search:', query);
+
+        if (!query) return;
+        if (!map) return;
+        if (!token) return;
 
         try {
-            const geocode = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}&proximity=23.6,46.76667&country=ro&limit=1`);
-            console.log(geocode);
+            const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&proximity=23.6,46.76667&country=ro&limit=1`;
+            const geocode = await fetch(geocodeUrl);
+            if (!geocode.ok) throw new Error(`Geocoding failed: ${geocode.status}`);
+
             const data = await geocode.json();
-            console.log(data);
-            if (!data.features?.[0]) return;
+            console.log('📦 Geocode response:', data);
 
-            const [lng, lat] = data.features[0].center;
+            const feature = data.features?.[0];
+            if (!feature) throw new Error('No results found for query.');
 
-            const response = await axios.get('/api/locations');
-            console.log(response.data);
-            const all = response.data;
+            const [lng, lat] = feature.center;
+            setQuery(feature.place_name); // ✅ update input to full matched address
+            setIsSearching(true);         // ✅ show close icon
 
-            const filtered = all.filter(loc => {
-                const dx = 111.32 * (loc.latitude - lat);
-                const dy = 40075 * Math.cos((lat * Math.PI) / 180) * (loc.longitude - lng) / 360;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                return distance <= 1;
-            });
+            const response = await axios.get(`/api/locations/filter?lat=${lat}&lng=${lng}`);
+            console.log('🏘 Filtered locations:', response.data);
+            setLocations(response.data);
 
-            const result = filtered.length >= 2 ? filtered : all;
-            console.log(result);
-            setLocations(result);
-
-            map.getMap().flyTo({ center: [lng, lat], zoom: 14, essential: true });
+            map.flyTo({ center: [lng, lat], zoom: 14, essential: true });
         } catch (err) {
-            console.error('Search error:', err);
+            console.error('❌ Search error:', err.message, err);
         }
+    };
+
+    const handleClearSearch = async () => {
+        try {
+            const response = await axios.get('/api/locations');
+            setLocations(response.data);
+        } catch (err) {
+            console.error('❌ Error loading all locations:', err.message, err);
+        }
+
+        setQuery('');
+        setIsSearching(false);
     };
 
     return (
@@ -62,7 +85,8 @@ const SearchBoxInput = () => {
                 }}
             />
             <Button
-                type="submit"
+                onClick={isSearching ? handleClearSearch : handleSubmit}
+                type={isSearching ? 'button' : 'submit'}
                 sx={{
                     backgroundColor: '#777',
                     color: 'white',
@@ -71,7 +95,7 @@ const SearchBoxInput = () => {
                     minWidth: '40px'
                 }}
             >
-                <SearchIcon />
+                {isSearching ? <CloseIcon /> : <SearchIcon />}
             </Button>
         </form>
     );
