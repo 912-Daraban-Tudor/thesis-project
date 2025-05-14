@@ -14,6 +14,39 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* index.css */
+
+/* Applies only when inside a .custom-popup-single parent */
+.custom-popup-single .mapboxgl-popup-content {
+  background-color: #c12525 !important;
+  /* dark red */
+  color: white !important;
+}
+
+.custom-popup-single .mapboxgl-popup-tip {
+  border-top-color: #b71c1c !important;
+}
+
+.custom-popup-multi .mapboxgl-popup-content {
+  background-color: #1e3a8a !important;
+  /* dark blue */
+  color: white !important;
+}
+
+.custom-popup-multi .mapboxgl-popup-tip {
+  border-top-color: #1e3a8a !important;
+}
+
+/* Optional: shared styles */
+.mapboxgl-popup-content {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 12px !important;
+  max-width: 240px;
+}
+
+
+
 a {
   font-weight: 500;
   color: #646cff;
