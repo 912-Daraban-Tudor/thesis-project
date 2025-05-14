@@ -59,7 +59,7 @@ const FilterPanel = ({ onApply }) => {
 
     const handleClear = () => {
         const defaultFilters = {
-            price: [0, 3000],
+            price: [0, 2000],
             floor: [0, 10],
             year_built: [1900, currentYear],
             has_parking: false,
@@ -91,7 +91,7 @@ const FilterPanel = ({ onApply }) => {
                 onChange={(e, newValue) => setPriceRange(newValue)}
                 valueLabelDisplay="auto"
                 min={0}
-                max={3000}
+                max={2000}
             />
 
             <Typography variant="subtitle1">

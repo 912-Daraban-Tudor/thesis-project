@@ -12,7 +12,7 @@ export const MapProvider = ({ children }) => {
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [filters, setFilters] = useState({
-        price: [0, 3000],
+        price: [0, 2000],
         floor: [0, 10],
         year_built: [1900, new Date().getFullYear()],
         has_parking: false,
