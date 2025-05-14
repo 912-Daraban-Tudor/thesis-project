@@ -58,12 +58,18 @@ export const addLocationWithRooms = async (req, res) => {
 export const getLocations = async (req, res) => {
   try {
     const result = await pool.query(`
-        SELECT l.*, 
-          (SELECT COUNT(*) FROM rooms WHERE location_id = l.id) AS room_count,
-          (SELECT MIN(price) FROM rooms WHERE location_id = l.id) AS price
+        SELECT 
+          l.*, 
+          (
+            SELECT json_agg(r.*)
+            FROM rooms r
+            WHERE r.location_id = l.id
+          ) AS rooms
         FROM locations l
       `);
     res.json(result.rows);
+    console.log('Locations:', result.rows);
+    console.log('Locations:', result.rows[1]);
   } catch (err) {
     console.error('Error fetching locations:', err);
     res.status(500).json({ message: 'Server error while fetching locations.' });

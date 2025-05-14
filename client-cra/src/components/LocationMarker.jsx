@@ -5,24 +5,22 @@ import { Avatar, Typography, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useMapContext } from '../context/MapContext';
 
-
 const LocationMarker = ({ location, selected, onClick }) => {
     const navigate = useNavigate();
     const { setSelectedLocation } = useMapContext();
-    const price = Number(location.price);
-    const isSingleRoom = Number(location.room_count) === 1;
+    const isSingleRoom = location.rooms?.length === 1;
+    const price = isSingleRoom ? Number(location.rooms[0]?.price) : null;
+    const roomCount = location.rooms?.length || 0;
     const buttonColor = isSingleRoom ? '#8b0000' : '#0d47a1';
     const chipColor = isSingleRoom ? '#ffcdd2' : '#bbdefb';
 
     const isFourDigitPrice = price > 999;
     const isThreeDigitPrice = price > 99;
-    const isTwoDigitPrice = price > 9;
 
     let avatarWidth;
     if (isSingleRoom) {
         if (isFourDigitPrice) avatarWidth = 39;
         else if (isThreeDigitPrice) avatarWidth = 34;
-        else if (isTwoDigitPrice) avatarWidth = 30;
         else avatarWidth = 30;
     } else {
         avatarWidth = 28;
@@ -56,7 +54,7 @@ const LocationMarker = ({ location, selected, onClick }) => {
                             onClick(location);
                         }}
                     >
-                        {isSingleRoom ? `${location.price}€` : location.room_count}
+                        {isSingleRoom ? `${price}€` : roomCount}
                     </Avatar>
                 </Marker>
             )}
@@ -91,8 +89,8 @@ const LocationMarker = ({ location, selected, onClick }) => {
 
                         <Typography variant="body2" style={{ marginBottom: '0.75rem' }}>
                             {isSingleRoom
-                                ? `Price: ${location.price}€`
-                                : `Available Rooms: ${location.room_count}`}
+                                ? `Price: ${price}€`
+                                : `Available Rooms: ${roomCount}`}
                         </Typography>
 
                         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -123,12 +121,15 @@ LocationMarker.propTypes = {
         id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
         latitude: PropTypes.number.isRequired,
         longitude: PropTypes.number.isRequired,
-        room_count: PropTypes.number.isRequired,
-        price: PropTypes.number,
         name: PropTypes.string.isRequired,
         has_centrala: PropTypes.bool,
         has_parking: PropTypes.bool,
         number_of_rooms: PropTypes.number,
+        rooms: PropTypes.arrayOf(
+            PropTypes.shape({
+                price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            })
+        ),
     }).isRequired,
     selected: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,

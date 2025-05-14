@@ -1,4 +1,3 @@
-// src/context/MapContext.js
 import { createContext, useContext, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
@@ -12,13 +11,23 @@ export const MapProvider = ({ children }) => {
     });
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [filters, setFilters] = useState({
+        price: [0, 3000],
+        floor: [0, 10],
+        year_built: [1900, new Date().getFullYear()],
+        has_parking: false,
+        has_centrala: false,
+        room_count: [],
+        number_of_rooms: [],
+    });
 
     const contextValue = useMemo(() => ({
         viewState, setViewState,
         locations, setLocations,
         selectedLocation, setSelectedLocation,
+        filters, setFilters,
+    }), [viewState, locations, selectedLocation, filters]);
 
-    }), [viewState, locations, selectedLocation]);
     console.log('MapProvider contextValue:', contextValue);
     return (
         <MapContext.Provider value={contextValue}>
@@ -26,6 +35,7 @@ export const MapProvider = ({ children }) => {
         </MapContext.Provider>
     );
 };
+
 export const useMapContext = () => useContext(MapContext);
 
 MapProvider.propTypes = {
