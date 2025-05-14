@@ -3,13 +3,16 @@ import PropTypes from 'prop-types';
 import { Marker, Popup } from 'react-map-gl';
 import { Avatar, Typography, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useMapContext } from '../context/MapContext';
+
 
 const LocationMarker = ({ location, selected, onClick }) => {
     const navigate = useNavigate();
-
-
+    const { setSelectedLocation } = useMapContext();
     const price = Number(location.price);
     const isSingleRoom = Number(location.room_count) === 1;
+    const buttonColor = isSingleRoom ? '#8b0000' : '#0d47a1';
+    const chipColor = isSingleRoom ? '#ffcdd2' : '#bbdefb';
 
     const isFourDigitPrice = price > 999;
     const isThreeDigitPrice = price > 99;
@@ -26,7 +29,7 @@ const LocationMarker = ({ location, selected, onClick }) => {
     }
 
     const avatarHeight = 28;
-    const fontSize = isSingleRoom ? '0.75rem' : '1.1rem';
+    const fontSize = isSingleRoom ? '0.75rem' : '1.3rem';
 
     return (
         <>
@@ -39,7 +42,8 @@ const LocationMarker = ({ location, selected, onClick }) => {
                 >
                     <Avatar
                         sx={{
-                            bgcolor: 'red',
+                            bgcolor: isSingleRoom ? '#d32f2f' : '#1976d2',
+                            color: 'white',
                             width: avatarWidth,
                             height: avatarHeight,
                             fontSize,
@@ -62,9 +66,12 @@ const LocationMarker = ({ location, selected, onClick }) => {
                     longitude={location.longitude}
                     latitude={location.latitude}
                     closeOnClick={true}
-                    onClose={() => onClick(null)}
+                    onClose={() => {
+                        setSelectedLocation(null);
+                    }}
                     anchor="bottom"
                     offset={[0, -10]}
+                    className={isSingleRoom ? 'custom-popup-single' : 'custom-popup-multi'}
                 >
                     <div>
                         <Typography variant="subtitle1" style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
@@ -72,10 +79,10 @@ const LocationMarker = ({ location, selected, onClick }) => {
                         </Typography>
 
                         {location.has_centrala && (
-                            <Chip label="Heating" size="small" sx={{ bgcolor: '#ffcdd2', color: 'black', mr: 1, mb: 1 }} />
+                            <Chip label="Heating" size="small" sx={{ bgcolor: chipColor, color: 'black', mr: 1, mb: 1 }} />
                         )}
                         {location.has_parking && (
-                            <Chip label="Parking" size="small" sx={{ bgcolor: '#ffcdd2', color: 'black', mr: 1, mb: 1 }} />
+                            <Chip label="Parking" size="small" sx={{ bgcolor: chipColor, color: 'black', mr: 1, mb: 1 }} />
                         )}
 
                         <Typography variant="body2" style={{ marginBottom: '0.25rem' }}>
@@ -94,8 +101,8 @@ const LocationMarker = ({ location, selected, onClick }) => {
                                 variant="contained"
                                 onClick={() => navigate(`/apartment/${location.id}`)}
                                 sx={{
-                                    backgroundColor: '#8b0000',
-                                    '&:hover': { backgroundColor: '#6a0000' },
+                                    backgroundColor: buttonColor,
+                                    '&:hover': { backgroundColor: isSingleRoom ? '#6a0000' : '#08306b' },
                                     color: 'white',
                                     fontSize: '0.75rem',
                                     padding: '4px 12px',

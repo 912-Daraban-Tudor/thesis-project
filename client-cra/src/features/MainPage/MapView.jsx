@@ -5,6 +5,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from '../../api/axiosInstance';
 import { useMapContext } from '../../context/MapContext';
 import LocationMarker from '../../components/LocationMarker';
+import MapLegend from '../../components/MapLegend';
+import { AttributionControl } from 'react-map-gl';
 
 const MapView = () => {
   const {
@@ -34,7 +36,7 @@ const MapView = () => {
 
   const handleMarkerClick = (location) => {
     setSelectedLocation(location);
-    if (map) {
+    if (location && map) {
       map.flyTo({
         center: [location.longitude, location.latitude],
         zoom: Math.max(viewState.zoom, 14),
@@ -50,6 +52,7 @@ const MapView = () => {
       <ReactMapGL
         id="mainMap" // MUST match useMap().mainMap
         {...viewState}
+        attributionControl={false}
         onMove={(evt) => setViewState(evt.viewState)}
         onClick={() => setSelectedLocation(null)}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
@@ -57,6 +60,7 @@ const MapView = () => {
         getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'grab')}
         style={{ width: '100%', height: '100%' }}
       >
+        <AttributionControl position="bottom-right" compact={true} />
         {locations.map((location) => (
           <LocationMarker
             key={location.id}
@@ -66,6 +70,7 @@ const MapView = () => {
           />
         ))}
       </ReactMapGL>
+      <MapLegend />
     </div>
   );
 };
