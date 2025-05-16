@@ -292,11 +292,128 @@ export const filterLocationsNearby = async (req, res) => {
       return distance <= 1;
     });
 
-    const final = filtered.length >= 2 ? filtered : all;
+    const final = filtered.length >= 5 ? filtered : all;
 
     res.json(final);
   } catch (err) {
     console.error('Error filtering locations:', err);
     res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+
+
+export const searchFilteredLocations = async (req, res) => {
+  try {
+    const {
+      lat,
+      lng,
+      priceMin = 0,
+      priceMax = 2000,
+      floorMin = 0,
+      floorMax = 10,
+      yearBuiltMin = 1900,
+      yearBuiltMax = new Date().getFullYear(),
+      has_parking,
+      has_centrala,
+      roomCount,
+      numberOfRooms,
+      sort,
+    } = req.query;
+
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    const hasCoords = !isNaN(latNum) && !isNaN(lngNum);
+
+    let query = `
+      SELECT 
+        l.*,
+        (
+          SELECT json_agg(r.*)
+          FROM rooms r
+          WHERE r.location_id = l.id
+        ) AS rooms
+        ${hasCoords ? `,
+        (
+          111.32 * (l.latitude - $1))^2 + 
+          (40075 * COS(RADIANS($2)) * (l.longitude - $3) / 360)^2
+        )::float AS distance_km` : ''}
+      FROM locations l
+    `;
+
+    let conditions = [
+      `(EXISTS (
+        SELECT 1 FROM rooms r 
+        WHERE r.location_id = l.id 
+        AND r.price BETWEEN $4 AND $5
+      ))`,
+      `l.floor BETWEEN $6 AND $7`,
+      `l.year_built BETWEEN $8 AND $9`,
+    ];
+    const values = hasCoords
+      ? [latNum, latNum, lngNum, priceMin, priceMax, floorMin, floorMax, yearBuiltMin, yearBuiltMax]
+      : [priceMin, priceMax, floorMin, floorMax, yearBuiltMin, yearBuiltMax];
+
+    let paramIndex = hasCoords ? 10 : 7;
+
+    if (has_parking === 'true') {
+      conditions.push(`l.has_parking = true`);
+    }
+    if (has_centrala === 'true') {
+      conditions.push(`l.has_centrala = true`);
+    }
+
+    if (roomCount) {
+      const counts = roomCount.split(',').map((c) => parseInt(c)).filter(n => !isNaN(n));
+      if (counts.length) {
+        const placeholders = counts.map((_, i) => `$${paramIndex + i}`).join(',');
+        conditions.push(`(SELECT COUNT(*) FROM rooms r WHERE r.location_id = l.id) IN (${placeholders})`);
+        values.push(...counts);
+        paramIndex += counts.length;
+      }
+    }
+
+    if (numberOfRooms) {
+      const total = numberOfRooms.split(',').map((c) => parseInt(c)).filter(n => !isNaN(n));
+      if (total.length) {
+        const placeholders = total.map((_, i) => `$${paramIndex + i}`).join(',');
+        conditions.push(`l.number_of_rooms IN (${placeholders})`);
+        values.push(...total);
+        paramIndex += total.length;
+      }
+    }
+
+    if (conditions.length) {
+      query += ` WHERE ` + conditions.join(' AND ');
+    }
+
+    if (sort === 'price') {
+      query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ASC`;
+    } else if (sort === 'distance' && hasCoords) {
+      query += ` ORDER BY distance_km ASC`;
+    }
+
+    const result = await pool.query(query, values);
+    const data = result.rows;
+
+    // optional fallback if < 5 results
+    if (hasCoords && data.length < 5) {
+      const allResult = await pool.query(`
+        SELECT 
+          l.*, 
+          (
+            SELECT json_agg(r.*)
+            FROM rooms r
+            WHERE r.location_id = l.id
+          ) AS rooms
+        FROM locations l
+      `);
+      return res.json(allResult.rows);
+    }
+
+    res.json(data);
+  } catch (err) {
+    console.error('❌ Error in searchFilteredLocations:', err);
+    res.status(500).json({ message: 'Server error during location search.' });
   }
 };
