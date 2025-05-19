@@ -1,4 +1,3 @@
-// TopNavBar.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -8,32 +7,28 @@ import {
   Menu,
   MenuItem,
   Box,
+  Drawer,
+  Typography,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import TuneIcon from '@mui/icons-material/Tune';
+import CloseIcon from '@mui/icons-material/Close';
 import SearchBoxInput from '../../components/SearchBoxInput';
+import FilterPanel from '../../components/FilterPanel';
 
 function TopNavBar() {
   const navigate = useNavigate();
 
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [anchorElProfile, setAnchorElProfile] = useState(null);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
-  const handleMenuOpen = (event) => {
-    setAnchorElMenu(event.currentTarget);
-  };
+  const handleMenuOpen = (event) => setAnchorElMenu(event.currentTarget);
+  const handleMenuClose = () => setAnchorElMenu(null);
 
-  const handleMenuClose = () => {
-    setAnchorElMenu(null);
-  };
-
-  const handleProfileOpen = (event) => {
-    setAnchorElProfile(event.currentTarget);
-  };
-
-  const handleProfileClose = () => {
-    setAnchorElProfile(null);
-  };
+  const handleProfileOpen = (event) => setAnchorElProfile(event.currentTarget);
+  const handleProfileClose = () => setAnchorElProfile(null);
 
   const handleProfileClick = () => {
     navigate('/account');
@@ -43,7 +38,7 @@ function TopNavBar() {
   const handleHomeClick = () => {
     navigate('/main');
     handleMenuClose();
-  }
+  };
 
   const handleMyPostsClick = () => {
     navigate('/my-posts');
@@ -56,52 +51,97 @@ function TopNavBar() {
     navigate('/login');
   };
 
+  const toggleFilterDrawer = (open) => () => {
+    setFilterDrawerOpen(open);
+  };
+
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
-      <Toolbar>
-        <IconButton
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          onClick={handleMenuOpen}
-        >
-          <MenuIcon />
-        </IconButton>
+    <>
+      <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
+        <Toolbar>
+          {/* Menu button */}
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={handleMenuOpen}
+          >
+            <MenuIcon />
+          </IconButton>
 
-        <Menu
-          anchorEl={anchorElMenu}
-          open={Boolean(anchorElMenu)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={handleHomeClick}>Home</MenuItem>
-          <MenuItem onClick={() => { console.log('Rooms clicked'); handleMenuClose(); }}>Rooms</MenuItem>
-          <MenuItem onClick={() => { console.log('About clicked'); handleMenuClose(); }}>About</MenuItem>
-        </Menu>
+          <Menu
+            anchorEl={anchorElMenu}
+            open={Boolean(anchorElMenu)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleHomeClick}>Home</MenuItem>
+            <MenuItem onClick={() => { console.log('Rooms clicked'); handleMenuClose(); }}>Rooms</MenuItem>
+            <MenuItem onClick={() => { console.log('About clicked'); handleMenuClose(); }}>About</MenuItem>
+          </Menu>
 
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-          <SearchBoxInput />
+          {/* Center: Search + Filters */}
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <SearchBoxInput />
+
+            <IconButton
+              size="large"
+              color="inherit"
+              onClick={toggleFilterDrawer(true)}
+              sx={{ ml: 1 }}
+            >
+              <TuneIcon />
+            </IconButton>
+          </Box>
+
+          {/* Profile icon */}
+          <IconButton
+            size="large"
+            color="inherit"
+            onClick={handleProfileOpen}
+          >
+            <AccountCircle />
+          </IconButton>
+
+          <Menu
+            anchorEl={anchorElProfile}
+            open={Boolean(anchorElProfile)}
+            onClose={handleProfileClose}
+          >
+            <MenuItem onClick={handleProfileClick}>My Account</MenuItem>
+            <MenuItem onClick={handleMyPostsClick}>My Posts</MenuItem>
+            <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+
+      {/* Right-side drawer for filters */}
+      <Drawer
+        anchor="right"
+        open={filterDrawerOpen}
+        onClose={toggleFilterDrawer(false)}
+      >
+        <Box
+          sx={{ width: 340, padding: 2, display: 'flex', flexDirection: 'column' }}
+          role="presentation"
+        >
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Filters</Typography>
+            <IconButton onClick={toggleFilterDrawer(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          <FilterPanel />
+
+          <Box mt={2}>
+            <Typography variant="caption" color="text.secondary">
+              Filters automatically apply on submit.
+            </Typography>
+          </Box>
         </Box>
-
-        <IconButton
-          size="large"
-          color="inherit"
-          onClick={handleProfileOpen}
-        >
-          <AccountCircle />
-        </IconButton>
-
-        <Menu
-          anchorEl={anchorElProfile}
-          open={Boolean(anchorElProfile)}
-          onClose={handleProfileClose}
-        >
-          <MenuItem onClick={handleProfileClick}>My Account</MenuItem>
-          <MenuItem onClick={handleMyPostsClick}>My Posts</MenuItem>
-          <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
-        </Menu>
-      </Toolbar>
-    </AppBar>
+      </Drawer>
+    </>
   );
 }
 

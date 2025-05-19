@@ -58,12 +58,18 @@ export const addLocationWithRooms = async (req, res) => {
 export const getLocations = async (req, res) => {
   try {
     const result = await pool.query(`
-        SELECT l.*, 
-          (SELECT COUNT(*) FROM rooms WHERE location_id = l.id) AS room_count,
-          (SELECT MIN(price) FROM rooms WHERE location_id = l.id) AS price
+        SELECT 
+          l.*, 
+          (
+            SELECT json_agg(r.*)
+            FROM rooms r
+            WHERE r.location_id = l.id
+          ) AS rooms
         FROM locations l
       `);
     res.json(result.rows);
+    console.log('Locations:', result.rows);
+    console.log('Locations:', result.rows[1]);
   } catch (err) {
     console.error('Error fetching locations:', err);
     res.status(500).json({ message: 'Server error while fetching locations.' });
@@ -286,11 +292,216 @@ export const filterLocationsNearby = async (req, res) => {
       return distance <= 1;
     });
 
-    const final = filtered.length >= 2 ? filtered : all;
+    const final = filtered.length >= 5 ? filtered : all;
 
     res.json(final);
   } catch (err) {
     console.error('Error filtering locations:', err);
     res.status(500).json({ message: 'Server error.' });
+  }
+};
+
+function parseSearchParams(query) {
+  return {
+    latNum: parseFloat(query.lat),
+    lngNum: parseFloat(query.lng),
+    priceMin: parseInt(query.priceMin) || 0,
+    priceMax: parseInt(query.priceMax) || 2000,
+    floorMin: parseInt(query.floorMin) || 0,
+    floorMax: parseInt(query.floorMax) || 10,
+    yearBuiltMin: parseInt(query.yearBuiltMin) || 1900,
+    yearBuiltMax: parseInt(query.yearBuiltMax) || new Date().getFullYear(),
+    has_parking: query.has_parking === 'true',
+    has_centrala: query.has_centrala === 'true',
+    roomCount: query.roomCount,
+    numberOfRooms: query.numberOfRooms,
+    sort: query.sort || ''
+  };
+}
+function buildSearchQueryWithCoordinates(params, applyFilters) {
+  const {
+    latNum, lngNum,
+    priceMin, priceMax,
+    floorMin, floorMax,
+    yearBuiltMin, yearBuiltMax,
+    has_parking, has_centrala,
+    roomCount, numberOfRooms,
+    sort,
+  } = params;
+
+  let query = `
+    SELECT 
+      l.*,
+      (
+        SELECT json_agg(r.*)
+        FROM rooms r
+        WHERE r.location_id = l.id
+      ) AS rooms,
+      SQRT(
+        POWER(111.32 * (l.latitude - $1), 2) + 
+        POWER(40075 * COS(RADIANS($2)) * (l.longitude - $3) / 360, 2)
+      ) AS distance_km
+    FROM locations l
+  `;
+
+  const values = [latNum, latNum, lngNum];
+  let paramIndex = 4;
+  const conditions = [`SQRT(POWER(111.32 * (l.latitude - $1), 2) + POWER(40075 * COS(RADIANS($2)) * (l.longitude - $3) / 360, 2)) < 1`];
+
+  if (applyFilters) {
+    conditions.push(`
+      EXISTS (
+        SELECT 1 FROM rooms r 
+        WHERE r.location_id = l.id 
+        AND r.price BETWEEN $${paramIndex} AND $${paramIndex + 1}
+      )
+    `);
+    values.push(priceMin, priceMax);
+    paramIndex += 2;
+
+    conditions.push(`l.floor BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+    values.push(floorMin, floorMax);
+    paramIndex += 2;
+
+    conditions.push(`l.year_built BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+    values.push(yearBuiltMin, yearBuiltMax);
+    paramIndex += 2;
+
+    if (has_parking) conditions.push(`l.has_parking = true`);
+    if (has_centrala) conditions.push(`l.has_centrala = true`);
+
+    if (roomCount) {
+      const counts = roomCount.split(',').map(Number).filter(n => !isNaN(n));
+      if (counts.length) {
+        const placeholders = counts.map(() => `$${paramIndex++}`).join(',');
+        conditions.push(`(SELECT COUNT(*) FROM rooms r WHERE r.location_id = l.id) IN (${placeholders})`);
+        values.push(...counts);
+      }
+    }
+
+    if (numberOfRooms) {
+      const totals = numberOfRooms.split(',').map(Number).filter(n => !isNaN(n));
+      if (totals.length) {
+        const placeholders = totals.map(() => `$${paramIndex++}`).join(',');
+        conditions.push(`l.number_of_rooms IN (${placeholders})`);
+        values.push(...totals);
+      }
+    }
+  }
+
+  if (conditions.length) {
+    query += ` WHERE ` + conditions.join(' AND ');
+  }
+
+  if (sort === 'price') {
+    query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ASC`;
+  } else {
+    query += ` ORDER BY distance_km ASC`;
+  }
+
+  return { query, values };
+}
+
+function buildSearchQueryWithoutCoordinates(params) {
+  const {
+    priceMin, priceMax,
+    floorMin, floorMax,
+    yearBuiltMin, yearBuiltMax,
+    has_parking, has_centrala,
+    roomCount, numberOfRooms,
+    sort,
+  } = params;
+
+  let query = `
+    SELECT 
+      l.*,
+      (
+        SELECT json_agg(r.*)
+        FROM rooms r
+        WHERE r.location_id = l.id
+      ) AS rooms
+    FROM locations l
+  `;
+
+  const values = [];
+  let paramIndex = 1;
+  const conditions = [];
+
+  conditions.push(`
+    EXISTS (
+      SELECT 1 FROM rooms r 
+      WHERE r.location_id = l.id 
+      AND r.price BETWEEN $${paramIndex} AND $${paramIndex + 1}
+    )
+  `);
+  values.push(priceMin, priceMax);
+  paramIndex += 2;
+
+  conditions.push(`l.floor BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+  values.push(floorMin, floorMax);
+  paramIndex += 2;
+
+  conditions.push(`l.year_built BETWEEN $${paramIndex} AND $${paramIndex + 1}`);
+  values.push(yearBuiltMin, yearBuiltMax);
+  paramIndex += 2;
+
+  if (has_parking) conditions.push(`l.has_parking = true`);
+  if (has_centrala) conditions.push(`l.has_centrala = true`);
+
+  if (roomCount) {
+    const counts = roomCount.split(',').map(Number).filter(n => !isNaN(n));
+    if (counts.length) {
+      const placeholders = counts.map(() => `$${paramIndex++}`).join(',');
+      conditions.push(`(SELECT COUNT(*) FROM rooms r WHERE r.location_id = l.id) IN (${placeholders})`);
+      values.push(...counts);
+    }
+  }
+
+  if (numberOfRooms) {
+    const totals = numberOfRooms.split(',').map(Number).filter(n => !isNaN(n));
+    if (totals.length) {
+      const placeholders = totals.map(() => `$${paramIndex++}`).join(',');
+      conditions.push(`l.number_of_rooms IN (${placeholders})`);
+      values.push(...totals);
+    }
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join(' AND ');
+  }
+
+  if (sort === 'price') {
+    query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ASC`;
+  }
+
+  return { query, values };
+}
+
+export const searchFilteredLocations = async (req, res) => {
+  try {
+    const params = parseSearchParams(req.query);
+    const hasCoords = !isNaN(params.latNum) && !isNaN(params.lngNum);
+
+    if (hasCoords) {
+      const { query, values } = buildSearchQueryWithCoordinates(params, true);
+      const result = await pool.query(query, values);
+
+      if (result.rows.length >= 1) {
+        return res.json(result.rows);
+      }
+
+      // fallback without filters
+      const fallback = buildSearchQueryWithCoordinates(params, false);
+      const fallbackResult = await pool.query(fallback.query, fallback.values);
+      return res.json(fallbackResult.rows);
+    } else {
+      const { query, values } = buildSearchQueryWithoutCoordinates(params);
+      const result = await pool.query(query, values);
+      return res.json(result.rows);
+    }
+
+  } catch (err) {
+    console.error('❌ Error in searchFilteredLocations:', err);
+    res.status(500).json({ message: 'Server error during location search.' });
   }
 };

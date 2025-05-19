@@ -9,7 +9,12 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'], // 🔥 required!
+}));
+
 app.use(express.json());
 
 // Test database connection (optional now)
