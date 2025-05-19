@@ -15,14 +15,11 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchBoxInput from '../../components/SearchBoxInput';
-import FilterPanel from '../../components/FilterPanel'; // Assuming you have a FilterPanel component
-import { useMapContext } from '../../context/MapContext';
-
+import FilterPanel from '../../components/FilterPanel';
 
 function TopNavBar() {
   const navigate = useNavigate();
 
-  const { setFilters } = useMapContext();
   const [anchorElMenu, setAnchorElMenu] = useState(null);
   const [anchorElProfile, setAnchorElProfile] = useState(null);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -62,7 +59,6 @@ function TopNavBar() {
     <>
       <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
         <Toolbar>
-
           {/* Menu button */}
           <IconButton
             size="large"
@@ -88,7 +84,6 @@ function TopNavBar() {
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <SearchBoxInput />
 
-            {/* Filter icon right next to search */}
             <IconButton
               size="large"
               color="inherit"
@@ -137,12 +132,13 @@ function TopNavBar() {
             </IconButton>
           </Box>
 
-          {/* Placeholder – replace with <FilterPanel /> */}
-          <FilterPanel onApply={(newFilters) => {
-            setFilters(newFilters);
-            setFilterDrawerOpen(false); // Close drawer after applying
-          }} />
+          <FilterPanel />
 
+          <Box mt={2}>
+            <Typography variant="caption" color="text.secondary">
+              Filters automatically apply on submit.
+            </Typography>
+          </Box>
         </Box>
       </Drawer>
     </>

@@ -12,13 +12,12 @@ import {
     Button,
 } from '@mui/material';
 import { useMapContext } from '../context/MapContext';
-import PropTypes from 'prop-types';
 
 const rangeText = ([min, max]) => `${min} - ${max}`;
 const currentYear = new Date().getFullYear();
 
-const FilterPanel = ({ onApply }) => {
-    const { filters } = useMapContext();
+const FilterPanel = () => {
+    const { filters, setFilters } = useMapContext();
 
     const [priceRange, setPriceRange] = useState(filters.price);
     const [floorRange, setFloorRange] = useState(filters.floor);
@@ -28,7 +27,6 @@ const FilterPanel = ({ onApply }) => {
     const [roomCount, setRoomCount] = useState(filters.room_count);
     const [totalRooms, setTotalRooms] = useState(filters.number_of_rooms);
 
-    // sync with context filters when they change
     useEffect(() => {
         setPriceRange(filters.price);
         setFloorRange(filters.floor);
@@ -46,15 +44,16 @@ const FilterPanel = ({ onApply }) => {
     };
 
     const handleApply = () => {
-        onApply({
-            price: priceRange,
-            floor: floorRange,
-            year_built: yearBuiltRange,
+        setFilters((prev) => ({
+            ...prev, // keep structure consistent
+            price: [...priceRange],
+            floor: [...floorRange],
+            year_built: [...yearBuiltRange],
             has_parking: hasParking,
             has_centrala: hasCentrala,
-            room_count: roomCount,
-            number_of_rooms: totalRooms,
-        });
+            room_count: [...roomCount],
+            number_of_rooms: [...totalRooms],
+        }));
     };
 
     const handleClear = () => {
@@ -68,7 +67,6 @@ const FilterPanel = ({ onApply }) => {
             number_of_rooms: [],
         };
 
-        // Reset UI state
         setPriceRange(defaultFilters.price);
         setFloorRange(defaultFilters.floor);
         setYearBuiltRange(defaultFilters.year_built);
@@ -77,8 +75,7 @@ const FilterPanel = ({ onApply }) => {
         setRoomCount([]);
         setTotalRooms([]);
 
-        // Call context update
-        onApply(defaultFilters);
+        setFilters(defaultFilters);
     };
 
     return (
@@ -185,9 +182,6 @@ const FilterPanel = ({ onApply }) => {
             </Button>
         </Box>
     );
-};
-FilterPanel.propTypes = {
-    onApply: PropTypes.func.isRequired,
 };
 
 export default FilterPanel;
