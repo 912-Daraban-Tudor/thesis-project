@@ -57,7 +57,7 @@ function TopNavBar() {
 
   return (
     <>
-      <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
+      <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#333' }}>
         <Toolbar>
           {/* Menu button */}
           <IconButton

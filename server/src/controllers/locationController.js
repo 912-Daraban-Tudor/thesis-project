@@ -315,7 +315,8 @@ function parseSearchParams(query) {
     has_centrala: query.has_centrala === 'true',
     roomCount: query.roomCount,
     numberOfRooms: query.numberOfRooms,
-    sort: query.sort || ''
+    sortBy: query.sortBy || '',
+    sortOrder: query.sortOrder || 'asc',
   };
 }
 function buildSearchQueryWithCoordinates(params, applyFilters) {
@@ -326,7 +327,6 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     yearBuiltMin, yearBuiltMax,
     has_parking, has_centrala,
     roomCount, numberOfRooms,
-    sort,
   } = params;
 
   let query = `
@@ -393,11 +393,12 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     query += ` WHERE ` + conditions.join(' AND ');
   }
 
-  if (sort === 'price') {
-    query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ASC`;
-  } else {
-    query += ` ORDER BY distance_km ASC`;
-  }
+  // if (sortBy === 'price') {
+  //   query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  // } else if (sortBy === 'distance' && hasCoords) {
+  //   query += ` ORDER BY distance_km ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  // }
+
 
   return { query, values };
 }
@@ -409,7 +410,6 @@ function buildSearchQueryWithoutCoordinates(params) {
     yearBuiltMin, yearBuiltMax,
     has_parking, has_centrala,
     roomCount, numberOfRooms,
-    sort,
   } = params;
 
   let query = `
@@ -470,9 +470,6 @@ function buildSearchQueryWithoutCoordinates(params) {
     query += ` WHERE ` + conditions.join(' AND ');
   }
 
-  if (sort === 'price') {
-    query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ASC`;
-  }
 
   return { query, values };
 }

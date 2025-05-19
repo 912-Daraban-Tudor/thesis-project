@@ -5,6 +5,7 @@ import MapView from './MapView';
 import { Fab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { MapProvider } from '../../context/MapContext';
+import ListViewDrawer from '../../components/ListViewDrawer';
 
 function MainPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ function MainPage() {
       <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <TopNavBar />
         <div style={{ flex: 1, position: 'relative' }}>
+          <ListViewDrawer />
           <MapView />
           <Fab
             color="primary"
