@@ -21,7 +21,10 @@ import 'react-toastify/dist/ReactToastify.css';
 function AccountPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isMe = !id;
+  const tokenPayload = JSON.parse(atob(localStorage.getItem('token')?.split('.')[1] || '{}'));
+  const loggedInUserId = tokenPayload?.id;
+  const isMe = !id || String(id) === String(loggedInUserId);
+
 
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({

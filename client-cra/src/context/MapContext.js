@@ -14,6 +14,7 @@ export const MapProvider = ({ children }) => {
 
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [highlightedLocation, setHighlightedLocation] = useState(null);
 
     const [filters, setFilters] = useState({
         price: [0, 2000],
@@ -26,7 +27,11 @@ export const MapProvider = ({ children }) => {
     });
 
     const [searchCoords, setSearchCoords] = useState(null); // from SearchBoxInput
-    const [sortBy, setSortBy] = useState(''); // "price" or "distance"
+    const [sortBy, setSortBy] = useState('price'); // "price" or "distance"
+    const [sortOrder, setSortOrder] = useState('asc'); // "asc" or "desc"
+
+    const [isFallback, setIsFallback] = useState(false);
+    const [listViewOpen, setListViewOpen] = useState(false);
 
     // Build query params for backend
     const buildQueryParams = () => {
@@ -57,6 +62,8 @@ export const MapProvider = ({ children }) => {
 
         if (sortBy) params.sort = sortBy;
 
+        if (sortOrder) params.order = sortOrder;
+
         return params;
     };
 
@@ -65,24 +72,53 @@ export const MapProvider = ({ children }) => {
             try {
                 const params = buildQueryParams();
                 const response = await axios.get('/api/locations/search', { params });
-                setLocations(response.data);
-            } catch (err) {
-                console.error('❌ Error fetching locations:', err.message);
+                setIsFallback(response.data.fallback); // Reset fallback state on new fetch
+                const returned = response.data.data || [];
+                setLocations(returned);
+            } catch (error) {
+                console.error('❌ Error fetching locations:', error.message);
             }
         };
 
         fetchLocations();
-    }, [filters, searchCoords, sortBy]);
+    }, [filters, searchCoords, sortBy, sortOrder]);
 
 
-    const contextValue = useMemo(() => ({
-        viewState, setViewState,
-        locations, setLocations,
-        selectedLocation, setSelectedLocation,
-        filters, setFilters,
-        searchCoords, setSearchCoords,
-        sortBy, setSortBy,
-    }), [viewState, locations, selectedLocation, filters, searchCoords, sortBy]);
+    const contextValue = useMemo(
+        () => ({
+            viewState,
+            setViewState,
+            locations,
+            setLocations,
+            selectedLocation,
+            setSelectedLocation,
+            highlightedLocation,
+            setHighlightedLocation,
+            filters,
+            setFilters,
+            searchCoords,
+            setSearchCoords,
+            sortBy,
+            setSortBy,
+            sortOrder,
+            setSortOrder,
+            isFallback,
+            listViewOpen,
+            setListViewOpen,
+        }),
+        [
+            viewState,
+            locations,
+            selectedLocation,
+            highlightedLocation,
+            filters,
+            searchCoords,
+            sortBy,
+            sortOrder,
+            isFallback,
+            listViewOpen,
+        ]
+    );
 
     return (
         <MapContext.Provider value={contextValue}>

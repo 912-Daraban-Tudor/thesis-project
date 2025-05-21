@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getUserInfo, updateUserInfo, getPublicUserInfo } from '../controllers/authController.js';
+import { registerUser, loginUser, getUserInfo, updateUserInfo, getPublicUserInfo, getUserByUsername, getUserById } from '../controllers/authController.js';
 import { verifyToken } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
@@ -12,6 +12,8 @@ router.post('/login', loginUser);
 router.get('/me', verifyToken, getUserInfo);
 router.get('/:id', verifyToken, getPublicUserInfo); // For getting user info by ID
 router.put('/me', verifyToken, updateUserInfo);
+router.get('/user-by-id/:id', getUserById);
+router.get('/user-by-username/:username', getUserByUsername);
 
 router.delete('/me', verifyToken, async (req, res) => {
   try {

@@ -4,6 +4,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapContext } from '../../context/MapContext';
 import LocationMarker from '../../components/LocationMarker';
 import MapLegend from '../../components/MapLegend';
+import { flyToWithOffset } from '../../utils/mapUtils';
+import { useMediaQuery, useTheme } from '@mui/material';
+
 
 const MapView = () => {
   const {
@@ -11,23 +14,21 @@ const MapView = () => {
     setViewState,
     locations,
     selectedLocation,
+    listViewOpen,
+    highlightedLocation,
     setSelectedLocation,
+    setHighlightedLocation
   } = useMapContext();
 
   const { mainMap } = useMap();
   const map = mainMap?.getMap();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleMarkerClick = (location) => {
     setSelectedLocation(location);
-    if (location && map) {
-      map.flyTo({
-        center: [location.longitude, location.latitude],
-        zoom: Math.max(viewState.zoom, 14),
-        speed: 2.5,
-        curve: 1.5,
-        essential: true,
-      });
-    }
+    setHighlightedLocation(null);
+    flyToWithOffset(map, location.longitude, location.latitude, listViewOpen, isMobile);
   };
 
   return (
@@ -37,7 +38,7 @@ const MapView = () => {
         {...viewState}
         attributionControl={false}
         onMove={(evt) => setViewState(evt.viewState)}
-        onClick={() => setSelectedLocation(null)}
+        onClick={() => { setHighlightedLocation(null); setSelectedLocation(null) }}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'grab')}
@@ -49,6 +50,7 @@ const MapView = () => {
             key={location.id}
             location={location}
             selected={selectedLocation?.id === location.id}
+            highlighted={highlightedLocation?.id === location.id}
             onClick={() => handleMarkerClick(location)}
           />
         ))}

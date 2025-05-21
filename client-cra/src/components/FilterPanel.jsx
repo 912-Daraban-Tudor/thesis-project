@@ -79,7 +79,16 @@ const FilterPanel = () => {
     };
 
     return (
-        <Box display="flex" overflow="hidden" flexDirection="column" gap={2}>
+        <Box
+            display="flex"
+            overflow="hidden"
+            flexDirection="column"
+            gap={1}
+            px={2}
+            pb={1}
+            width="100%"
+            boxSizing="border-box"
+        >
             <Typography variant="subtitle1">
                 Price Range: {rangeText(priceRange)} €
             </Typography>
@@ -137,7 +146,7 @@ const FilterPanel = () => {
             <FormControl component="fieldset">
                 <FormLabel>Rooms for Rent</FormLabel>
                 <FormGroup row>
-                    {[1, 2, 3, 4, 5].map((n) => (
+                    {[1, 2, 3, 4].map((n) => (
                         <FormControlLabel
                             key={`room-${n}`}
                             control={
@@ -157,7 +166,7 @@ const FilterPanel = () => {
             <FormControl component="fieldset">
                 <FormLabel>Total Rooms</FormLabel>
                 <FormGroup row>
-                    {[1, 2, 3, 4, 5].map((n) => (
+                    {[1, 2, 3, 4].map((n) => (
                         <FormControlLabel
                             key={`total-${n}`}
                             control={

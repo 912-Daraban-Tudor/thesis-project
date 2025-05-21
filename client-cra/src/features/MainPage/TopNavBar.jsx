@@ -57,7 +57,7 @@ function TopNavBar() {
 
   return (
     <>
-      <AppBar position="fixed" sx={{ backgroundColor: '#333' }}>
+      <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#333' }}>
         <Toolbar>
           {/* Menu button */}
           <IconButton
@@ -120,27 +120,71 @@ function TopNavBar() {
         anchor="right"
         open={filterDrawerOpen}
         onClose={toggleFilterDrawer(false)}
+        variant="persistent"
+        PaperProps={{
+          sx: {
+            width: 340,
+            height: 'calc(100% - 64px)', // below TopNavBar
+            top: '64px',
+          },
+        }}
       >
         <Box
-          sx={{ width: 340, padding: 2, display: 'flex', flexDirection: 'column' }}
-          role="presentation"
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
         >
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            px={2}
+            pt={2}
+            pb={1}
+          >
             <Typography variant="h6">Filters</Typography>
             <IconButton onClick={toggleFilterDrawer(false)} size="small">
               <CloseIcon />
             </IconButton>
           </Box>
 
-          <FilterPanel />
-
-          <Box mt={2}>
-            <Typography variant="caption" color="text.secondary">
-              Filters automatically apply on submit.
-            </Typography>
+          {/* 🧠 Scrollable container with custom scrollbar */}
+          <Box
+            sx={{
+              flex: 1,
+              overflow: 'auto',
+              px: 2,
+              pb: 2,
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: '#ccc',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                backgroundColor: '#aaa',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: '#f2f2f2',
+              },
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#ccc #f2f2f2',
+            }}
+          >
+            <FilterPanel />
+            <Box mt={2}>
+              <Typography variant="caption" color="text.secondary">
+                Filters automatically apply on submit.
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Drawer>
+
+
     </>
   );
 }
