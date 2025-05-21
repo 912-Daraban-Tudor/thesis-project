@@ -1,4 +1,3 @@
-// Refactored PostRoomPage styled like EditPostPage
 import React, { useState } from 'react';
 import axios from '../../api/axiosInstance';
 import {
@@ -20,6 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import AddressInput from '../../components/AddressInput';
+import { useDropzone } from 'react-dropzone';
 
 function PostRoomPage() {
   const [apartment, setApartment] = useState({
@@ -39,6 +39,14 @@ function PostRoomPage() {
     { price: '', description: '', balcony: false, sex_preference: '' }
   ]);
 
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+
+  const onDrop = (acceptedFiles) => {
+    setSelectedFiles((prev) => [...prev, ...acceptedFiles]);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } });
   const [notification, setNotification] = useState({
     open: false,
     message: '',
@@ -76,6 +84,23 @@ function PostRoomPage() {
 
   const handleCloseNotification = () => setNotification({ ...notification, open: false });
 
+  const handleUploadImages = async () => {
+    const formData = new FormData();
+    selectedFiles.forEach((file) => formData.append('images', file));
+
+    try {
+      const res = await axios.post('/api/images', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setUploadedImageUrls(res.data.images);
+      setNotification({ open: true, message: 'Images uploaded!', severity: 'success' });
+    } catch (error) {
+      console.error('Image upload failed', error);
+      setNotification({ open: true, message: 'Image upload failed', severity: 'error' });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!apartment.address || !apartment.latitude || !apartment.longitude) {
@@ -84,7 +109,12 @@ function PostRoomPage() {
     }
 
     try {
-      await axios.post('/api/locations/with-rooms', { apartment, rooms });
+      await axios.post('/api/locations/with-rooms', {
+        ...apartment,
+        images: uploadedImageUrls,
+        rooms,
+      });
+
       setNotification({ open: true, message: 'Apartment successfully posted!', severity: 'success' });
       setTimeout(() => navigate('/main'), 1500);
     } catch (err) {
@@ -94,7 +124,7 @@ function PostRoomPage() {
   };
 
   return (
-    <div style={{ backgroundColor: '#fff7ee', minHeight: '100vh', padding: '2rem', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ backgroundColor: '#fff7ee', minHeight: '100vh', width: '100vw', padding: '2rem', display: 'flex', justifyContent: 'center' }}>
       <Box sx={{ width: '100%', maxWidth: '900px', backgroundColor: '#f7fbff', p: 3, borderRadius: 2, boxShadow: 3 }}>
         <Button
           variant="outlined"
@@ -120,7 +150,7 @@ function PostRoomPage() {
             fullWidth
             required
             sx={{ mb: 2 }}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
 
           <AddressInput
@@ -146,6 +176,71 @@ function PostRoomPage() {
               <Checkbox checked={apartment.has_parking} onChange={handleApartmentChange} name="has_parking" />
               <Typography variant="body1" color='black'>Has parking</Typography>
             </Box>
+          </Box>
+
+          <Typography variant="h6" sx={{ mb: 1 }}>Images</Typography>
+          <Divider sx={{ mb: 2 }} />
+
+          <Box
+            {...getRootProps()}
+            sx={{
+              border: '2px dashed #4a7ebb',
+              padding: 2,
+              textAlign: 'center',
+              backgroundColor: isDragActive ? '#e3f2fd' : '#fafafa',
+              cursor: 'pointer',
+              mb: 2
+            }}
+          >
+            <input {...getInputProps()} />
+            <Typography sx={{ color: '#4a7ebb' }}>Drag & drop images here, or click to select files</Typography>
+          </Box>
+
+          {selectedFiles.length > 0 && (
+            <>
+              <Typography variant="body2" sx={{ mb: 1 }}>Selected Images:</Typography>
+              <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
+                {selectedFiles.map((file, index) => (
+                  <Box key={index} position="relative">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`preview-${index}`}
+                      style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8 }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+                      }}
+                      sx={{
+                        position: 'absolute',
+                        top: -8,
+                        right: -8,
+                        backgroundColor: 'white',
+                        boxShadow: 1,
+                      }}
+                    >
+                      ✕
+                    </IconButton>
+                  </Box>
+                ))}
+              </Box>
+            </>
+          )}
+
+          <Button onClick={handleUploadImages} variant="outlined" sx={{ mb: 3, }}>
+            Upload Selected Images
+          </Button>
+
+          <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
+            {uploadedImageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`upload-${index}`}
+                style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8 }}
+              />
+            ))}
           </Box>
 
           <Typography variant="h6" sx={{ mb: 1 }}>Rooms</Typography>

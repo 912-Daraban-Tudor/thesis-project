@@ -1,5 +1,5 @@
 // src/components/ListViewDrawer.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
     Drawer,
     IconButton,
@@ -10,25 +10,27 @@ import {
     MenuItem,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import ChevronUpIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChevronDownIcon from '@mui/icons-material/ExpandMore';
-import { useNavigate } from 'react-router-dom';
 import { useMapContext } from '../context/MapContext';
 import ListViewItem from './ListViewItem';
 import { useMap } from 'react-map-gl';
+import { flyToWithOffset } from '../utils/mapUtils';
 
 const ListViewDrawer = () => {
     const {
         locations,
         selectedLocation,
         setSelectedLocation,
+        setHighlightedLocation,
         searchCoords,
-        fallbackTriggered,
+        isFallback,
         setSortBy,
         sortBy,
         setSortOrder,
+        listViewOpen,
+        setListViewOpen,
         sortOrder,
     } = useMapContext();
 
@@ -37,11 +39,8 @@ const ListViewDrawer = () => {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const [open, setOpen] = useState(false);
 
-    const navigate = useNavigate();
-
-    const toggleOpen = () => setOpen((prev) => !prev);
+    const toggleOpen = () => setListViewOpen(prev => !prev);
 
     const sortedLocations = useMemo(() => {
         return [...locations].sort((a, b) => {
@@ -61,30 +60,31 @@ const ListViewDrawer = () => {
 
 
     const handleItemClick = (location) => {
-        setSelectedLocation(location);
-        map.flyTo({
-            center: [location.longitude, location.latitude],
-            zoom: 15,
-            speed: 1.2,
-            curve: 1.5,
-            easing: (t) => t,
-        });
+        setSelectedLocation(null);
+        setHighlightedLocation(location);
+        flyToWithOffset(map, location.longitude, location.latitude, listViewOpen, isMobile);
     };
 
     return (
         <>
             <Drawer
                 anchor={isMobile ? 'bottom' : 'left'}
-                open={open}
-                onClose={toggleOpen}
+                open={listViewOpen}
+                onClose={() => {
+                    setListViewOpen(false);
+                    setHighlightedLocation(null);
+                }}
                 variant="persistent"
                 PaperProps={{
                     sx: {
                         width: isMobile ? '100%' : '45vw',
-                        height: isMobile ? '50vh' : '100%',
+                        height: isMobile ? '50vh' : 'calc(100% - 64px)',
                         top: isMobile ? 'auto' : '64px',
                         zIndex: 1200,
                         backgroundColor: '#f8f8f8',
+                        overflow: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
                     },
                 }}
             >
@@ -108,20 +108,43 @@ const ListViewDrawer = () => {
                         </Select>
 
                         <IconButton onClick={toggleOpen}>
-                            {isMobile ? <ChevronDownIcon /> : <ChevronLeftIcon />}
+                            {isMobile ? <ExpandMoreIcon /> : <ChevronLeftIcon />}
                         </IconButton>
                     </Box>
                 </Box>
 
-                {searchCoords && fallbackTriggered && (
+                {searchCoords && isFallback && (
                     <Box px={2} pb={1}>
                         <Typography variant="body2" color="text.secondary">
-                            No rooms for rent near this location, you might consider:
+                            No rooms for rent near this location, try searching for a different location.
                         </Typography>
                     </Box>
                 )}
 
-                <Box px={2} pb={2} overflow="auto" flex={1}>
+                <Box
+                    px={2}
+                    pb={2}
+                    overflow="auto"
+                    flex={1}
+                    sx={{
+                        maxHeight: '100%',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#ccc',
+                            borderRadius: '4px',
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            backgroundColor: '#aaa',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: '#f2f2f2',
+                        },
+                        scrollbarWidth: 'thin', // Firefox
+                        scrollbarColor: '#ccc #f2f2f2', // Firefox
+                    }}
+                >
                     {sortedLocations.map((loc) => (
                         <ListViewItem
                             key={loc.id}
@@ -134,7 +157,7 @@ const ListViewDrawer = () => {
 
             </Drawer>
 
-            {!open && (
+            {!listViewOpen && (
                 <IconButton
                     onClick={toggleOpen}
                     sx={{
@@ -147,7 +170,7 @@ const ListViewDrawer = () => {
                         '&:hover': { backgroundColor: '#f0f0f0' },
                     }}
                 >
-                    {isMobile ? <ChevronUpIcon /> : <ChevronRightIcon />}
+                    {isMobile ? <ExpandMoreIcon style={{ transform: 'rotate(180deg)' }} /> : <ChevronRightIcon />}
                 </IconButton>
             )}
         </>

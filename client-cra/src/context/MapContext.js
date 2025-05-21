@@ -14,6 +14,7 @@ export const MapProvider = ({ children }) => {
 
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
+    const [highlightedLocation, setHighlightedLocation] = useState(null);
 
     const [filters, setFilters] = useState({
         price: [0, 2000],
@@ -71,17 +72,9 @@ export const MapProvider = ({ children }) => {
             try {
                 const params = buildQueryParams();
                 const response = await axios.get('/api/locations/search', { params });
-
-                const returned = response.data || [];
+                setIsFallback(response.data.fallback); // Reset fallback state on new fetch
+                const returned = response.data.data || [];
                 setLocations(returned);
-
-                // Detect fallback (used only when searchCoords exists)
-                if (searchCoords) {
-                    const nearbyCount = returned.filter(loc => loc.distance_km < 1).length;
-                    setIsFallback(nearbyCount < 5);
-                } else {
-                    setIsFallback(false);
-                }
             } catch (error) {
                 console.error('❌ Error fetching locations:', error.message);
             }
@@ -99,6 +92,8 @@ export const MapProvider = ({ children }) => {
             setLocations,
             selectedLocation,
             setSelectedLocation,
+            highlightedLocation,
+            setHighlightedLocation,
             filters,
             setFilters,
             searchCoords,
@@ -115,6 +110,7 @@ export const MapProvider = ({ children }) => {
             viewState,
             locations,
             selectedLocation,
+            highlightedLocation,
             filters,
             searchCoords,
             sortBy,

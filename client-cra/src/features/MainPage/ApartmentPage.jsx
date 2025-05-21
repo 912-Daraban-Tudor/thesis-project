@@ -1,4 +1,3 @@
-// Redesigned ApartmentPage with full-width layout, metadata, styled map, and corrected visual layout
 import React, { useEffect, useState } from 'react';
 import axios from '../../api/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -11,15 +10,29 @@ import {
   Chip,
   Grid,
   CircularProgress,
+  Button,
 } from '@mui/material';
 import ReactMapGL, { Marker } from 'react-map-gl';
+import { useChatUI } from '../../context/ChatUIContext';
+import { jwtDecode } from 'jwt-decode';
+import Lightbox from 'react-image-lightbox';
+import 'react-image-lightbox/style.css';
 
 function ApartmentPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [apartment, setApartment] = useState(null);
   const [rooms, setRooms] = useState([]);
+  const [images, setImages] = useState([]);
   const [postedBy, setPostedBy] = useState(null);
+  const { openChat } = useChatUI();
+
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const token = localStorage.getItem('token');
+  const decodedToken = token ? jwtDecode(token) : null;
+  const isMe = decodedToken?.id === apartment?.created_by;
 
   useEffect(() => {
     const fetchApartment = async () => {
@@ -27,12 +40,12 @@ function ApartmentPage() {
         const res = await axios.get(`/api/locations/${id}`);
         setApartment(res.data.location);
         setRooms(res.data.rooms);
+        setImages(res.data.images || []);
 
         if (res.data.location.created_by) {
           const userRes = await axios.get(`/api/auth/${res.data.location.created_by}`);
           setPostedBy(userRes.data);
         }
-
       } catch (err) {
         console.error('Error fetching apartment:', err);
       }
@@ -53,42 +66,145 @@ function ApartmentPage() {
 
   return (
     <Box sx={{ p: 4, backgroundColor: '#f7fbff', minHeight: '100vh', width: '100vw', overflowX: 'hidden' }}>
-      <Box sx={{ minWidth: '300px', maxWidth: '1200px', mx: 'auto', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: 1, minWidth: 300, backgroundColor: '#ffffff', p: 3, borderRadius: 2, boxShadow: 1, color: 'black' }}>
-          <Typography variant="h4" sx={{ color: '#4a7ebb', mb: 1 }}>{apartment.name}</Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>{apartment.address}</Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}><strong>Floor:</strong> {apartment.floor}</Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}><strong>Number of Rooms:</strong> {apartment.number_of_rooms}</Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}><strong>Year Built:</strong> {apartment.year_built}</Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            <strong>Posted by:</strong>{' '}
-            {postedBy ? (
-              <button
-                onClick={() => navigate(`/account/${postedBy.id}`)}
-                style={{
-                  color: '#1976d2',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  background: 'none',
-                  border: 'none',
-                  padding: 0,
-                  fontSize: 'inherit',
-                  textAlign: 'left',
+      <Button
+        variant="outlined"
+        color="secondary"
+        sx={{
+          borderColor: '#4a7ebb',
+          color: '#4a7ebb',
+          textTransform: 'none',
+          fontWeight: 500,
+        }}
+        onClick={() => navigate(-1)}
+      >
+        BACK
+      </Button>
+      <Box sx={{ width: '80vw', minWidth: '400px', maxWidth: '1200px', mx: 'auto', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 300,
+            backgroundColor: '#ffffff',
+            p: 3,
+            borderRadius: 2,
+            boxShadow: 1,
+            color: 'black',
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 2,
+          }}
+        >
+          {/* Left side: Apartment details */}
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h4" sx={{ color: '#4a7ebb', mb: 1 }}>{apartment.name}</Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>{apartment.address}</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}><strong>Floor:</strong> {apartment.floor}</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}><strong>Number of Rooms:</strong> {apartment.number_of_rooms}</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}><strong>Year Built:</strong> {apartment.year_built}</Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              <strong>Posted by:</strong>{' '}
+              {postedBy ? (
+                <button
+                  onClick={() => navigate(`/account/${postedBy.id}`)}
+                  style={{
+                    color: '#1976d2',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    fontSize: 'inherit',
+                    textAlign: 'left',
+                  }}
+                >
+                  {postedBy.username}
+                </button>
+              ) : 'Unknown'}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 1 }}><strong>Posted on:</strong> {formatDate(apartment.created_at)}</Typography>
+
+            <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
+              {apartment.has_centrala && <Chip label="Heating" color="primary" />}
+              {apartment.has_parking && <Chip label="Parking" color="primary" />}
+            </Box>
+
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              <strong>Description:</strong> {apartment.description}
+            </Typography>
+
+            {isMe ? (
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() =>
+                  navigate(`/edit-post/${apartment.id}`, {
+                    state: { apartment, rooms },
+                  })
+                }
+                sx={{
+                  backgroundColor: '#795548',
+                  color: 'white',
+                  '&:hover': { backgroundColor: '#5d4037' },
                 }}
               >
-                {postedBy.username}
-              </button>
-            ) : 'Unknown'}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}><strong>Posted on:</strong> {formatDate(apartment.created_at)}</Typography>
-
-          <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
-            {apartment.has_centrala && <Chip label="Heating" color="primary" />}
-            {apartment.has_parking && <Chip label="Parking" color="primary" />}
+                Edit Post
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => openChat(apartment.created_by)}
+                sx={{
+                  borderColor: '#1976d2',
+                  color: '#1976d2',
+                  fontWeight: 500,
+                  '&:hover': {
+                    backgroundColor: '#e3f2fd',
+                    borderColor: '#1976d2',
+                  },
+                }}
+              >
+                Send a Message
+              </Button>
+            )}
           </Box>
 
-          <Typography variant="body2" sx={{ mb: 3 }}><strong>Description:</strong> {apartment.description}</Typography>
+          {/* Right side: Compact image grid */}
+          <Box
+            sx={{
+              width: 180,
+              height: 180,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0,
+              backgroundColor: 'grey.400',
+              borderRadius: 2,
+              overflow: 'hidden',
+              boxShadow: 2,
+            }}
+          >
+            {images.slice(0, 4).map((url, index) => (
+              <Box
+                key={index}
+                component="img"
+                src={url.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto,f_auto/')}
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setIsLightboxOpen(true);
+                }}
+                alt={`thumb-${index}`}
+                sx={{
+                  width: '50%',
+                  height: '50%',
+                  objectFit: 'cover',
+                  cursor: 'pointer',
+                }}
+              />
+            ))}
+          </Box>
+
         </Box>
+
 
         <Box
           sx={{
@@ -97,7 +213,7 @@ function ApartmentPage() {
             borderRadius: 2,
             overflow: 'hidden',
             boxShadow: 3,
-            flexShrink: 0
+            flexShrink: 0,
           }}
         >
           <ReactMapGL
@@ -131,17 +247,42 @@ function ApartmentPage() {
             <Grid item xs={12} md={6} key={room.id}>
               <Card sx={{ backgroundColor: '#fffbe6', boxShadow: 2 }}>
                 <CardContent>
-                  <Typography variant="subtitle1" sx={{ color: '#4a7ebb', fontWeight: 500 }}>Price: {room.price}€</Typography>
-                  <Typography variant="body2" sx={{ mt: 1 }}><strong>Balcony:</strong> {room.balcony ? 'Yes' : 'No'}</Typography>
-                  <Typography variant="body2"><strong>Sex Preference:</strong> {room.sex_preference || 'None'}</Typography>
-                  <Typography variant="body2"><strong>Available:</strong> {room.available ? 'Yes' : 'No'}</Typography>
-                  <Typography variant="body2" sx={{ mt: 1 }}><strong>Description:</strong> {room.description}</Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#4a7ebb', fontWeight: 500 }}>
+                    Price: {room.price}€
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Balcony:</strong> {room.balcony ? 'Yes' : 'No'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Gender Preference:</strong> {room.sex_preference || 'None'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Available:</strong> {room.available ? 'Yes' : 'No'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Description:</strong> {room.description}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
       </Box>
+
+      {isLightboxOpen && images.length > 0 && (
+        <Lightbox
+          mainSrc={images[lightboxIndex]}
+          nextSrc={images[(lightboxIndex + 1) % images.length]}
+          prevSrc={images[(lightboxIndex + images.length - 1) % images.length]}
+          onCloseRequest={() => setIsLightboxOpen(false)}
+          onMovePrevRequest={() =>
+            setLightboxIndex((lightboxIndex + images.length - 1) % images.length)
+          }
+          onMoveNextRequest={() =>
+            setLightboxIndex((lightboxIndex + 1) % images.length)
+          }
+        />
+      )}
     </Box>
   );
 }
