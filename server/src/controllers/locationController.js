@@ -11,7 +11,12 @@ export const addLocation = async (req, res) => {
     }
 
     const result = await pool.query(
-      'INSERT INTO locations (name, description, latitude, longitude, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      `INSERT INTO locations (
+         name, description, latitude, longitude, created_by, geom
+       ) VALUES (
+         $1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($4, $3), 4326)
+       )
+       RETURNING *`,
       [name, description, latitude, longitude, userId]
     );
 
@@ -21,6 +26,7 @@ export const addLocation = async (req, res) => {
     res.status(500).json({ message: 'Server error while adding location.' });
   }
 };
+
 
 export const addLocationWithRooms = async (req, res) => {
   try {
@@ -42,11 +48,18 @@ export const addLocationWithRooms = async (req, res) => {
     const userId = req.user.id;
 
     const locationResult = await pool.query(
-      `INSERT INTO locations
-        (name, description, latitude, longitude, has_centrala, has_parking, floor, year_built, address, number_of_rooms, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      `INSERT INTO locations (
+         name, description, latitude, longitude, has_centrala, has_parking,
+         floor, year_built, address, number_of_rooms, created_by, geom
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6,
+         $7, $8, $9, $10, $11, ST_SetSRID(ST_MakePoint($4, $3), 4326)
+       )
        RETURNING id`,
-      [name, description, latitude, longitude, has_centrala, has_parking, floor, year_built, address, number_of_rooms, userId]
+      [
+        name, description, latitude, longitude, has_centrala, has_parking,
+        floor, year_built, address, number_of_rooms, userId
+      ]
     );
 
     const locationId = locationResult.rows[0].id;
@@ -72,10 +85,11 @@ export const addLocationWithRooms = async (req, res) => {
     res.status(201).json({ message: 'Location added successfully', locationId });
 
   } catch (err) {
-    console.error('Error adding location:', err);
+    console.error('Error adding location with rooms:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 
@@ -315,34 +329,40 @@ export const filterLocationsNearby = async (req, res) => {
   try {
     const lat = parseFloat(req.query.lat);
     const lng = parseFloat(req.query.lng);
+    const radiusMeters = parseFloat(req.query.radius) || 1000; // default to 1000 meters
 
     if (isNaN(lat) || isNaN(lng)) {
-      return res.status(400).json({ message: 'Latitude and longitude must be numbers.' });
+      return res.status(400).json({ message: 'Latitude and longitude must be valid numbers.' });
     }
 
+    const result = await pool.query(
+      `SELECT *
+       FROM locations
+       WHERE ST_DWithin(
+         geom,
+         ST_SetSRID(ST_MakePoint($1, $2), 4326),
+         $3
+       )`,
+      [lng, lat, radiusMeters]
+    );
 
-    if (!lat || !lng) {
-      return res.status(400).json({ message: 'Latitude and longitude are required.' });
+    const filtered = result.rows;
+
+    // fallback: return all if fewer than 5
+    if (filtered.length >= 5) {
+      return res.json(filtered);
+    } else {
+      const allResult = await pool.query('SELECT * FROM locations');
+      return res.json(allResult.rows);
     }
 
-    const result = await pool.query('SELECT * FROM locations');
-    const all = result.rows;
-
-    const filtered = all.filter(loc => {
-      const dx = 111.32 * (loc.latitude - lat);
-      const dy = 40075 * Math.cos((lat * Math.PI) / 180) * (loc.longitude - lng) / 360;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance <= 1;
-    });
-
-    const final = filtered.length >= 5 ? filtered : all;
-
-    res.json(final);
   } catch (err) {
-    console.error('Error filtering locations:', err);
+    console.error('Error filtering locations with PostGIS:', err);
     res.status(500).json({ message: 'Server error.' });
   }
 };
+
+// Revised backend functions for full bus line filtering
 
 function parseSearchParams(query) {
   return {
@@ -358,10 +378,14 @@ function parseSearchParams(query) {
     has_centrala: query.has_centrala === 'true',
     roomCount: query.roomCount,
     numberOfRooms: query.numberOfRooms,
-    sortBy: query.sortBy || '',
-    sortOrder: query.sortOrder || 'asc',
+    sortBy: query.sort || '',
+    sortOrder: query.order || 'asc',
+    busLineProximity: query.busLineProximity || null,
+    universityLat: parseFloat(query.universityLat),
+    universityLng: parseFloat(query.universityLng),
   };
 }
+
 function buildSearchQueryWithCoordinates(params, applyFilters) {
   const {
     latNum, lngNum,
@@ -370,26 +394,36 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     yearBuiltMin, yearBuiltMax,
     has_parking, has_centrala,
     roomCount, numberOfRooms,
+    sortBy, sortOrder,
+    busLineProximity,
+    universityLat,
+    universityLng
   } = params;
 
   let query = `
-    SELECT 
-      l.*,
-      (
-        SELECT json_agg(r.*)
-        FROM rooms r
-        WHERE r.location_id = l.id
-      ) AS rooms,
-      SQRT(
-        POWER(111.32 * (l.latitude - $1), 2) + 
-        POWER(40075 * COS(RADIANS($2)) * (l.longitude - $3) / 360, 2)
-      ) AS distance_km
-    FROM locations l
-  `;
+  SELECT 
+    l.*,
+    (
+      SELECT json_agg(r.*)
+      FROM rooms r
+      WHERE r.location_id = l.id
+    ) AS rooms,
+    ST_Distance(
+      l.geom::geography,
+      ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+    ) AS distance_km
+  FROM locations l
+`;
 
-  const values = [latNum, latNum, lngNum];
-  let paramIndex = 4;
-  const conditions = [`SQRT(POWER(111.32 * (l.latitude - $1), 2) + POWER(40075 * COS(RADIANS($2)) * (l.longitude - $3) / 360, 2)) < 1`];
+  const values = [lngNum, latNum];
+  let paramIndex = 3;
+  const conditions = [
+    `ST_DWithin(
+    l.geom::geography,
+    ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+    1000
+  )`
+  ];
 
   if (applyFilters) {
     conditions.push(`
@@ -430,18 +464,42 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
         values.push(...totals);
       }
     }
+
+    if (busLineProximity) {
+      conditions.push(`
+        EXISTS (
+          SELECT 1 FROM rutelinii rl
+          WHERE rl.linia = $${paramIndex}
+          AND ST_DWithin(rl.geom::geography, l.geom::geography, 300)
+        )
+      `);
+      values.push(busLineProximity);
+      paramIndex++;
+    }
+
+    if (!isNaN(universityLat) && !isNaN(universityLng)) {
+      conditions.push(`
+        EXISTS (
+          SELECT 1 FROM rutelinii rl
+          JOIN statii s ON rl.ruta = s.ruta
+          WHERE ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326), 200)
+          AND ST_DWithin(rl.geom::geography, l.geom::geography, 300)
+        )
+      `);
+      values.push(universityLng, universityLat);
+      paramIndex += 2;
+    }
   }
 
   if (conditions.length) {
     query += ` WHERE ` + conditions.join(' AND ');
   }
 
-  // if (sortBy === 'price') {
-  //   query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
-  // } else if (sortBy === 'distance' && hasCoords) {
-  //   query += ` ORDER BY distance_km ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
-  // }
-
+  if (sortBy === 'price') {
+    query += ` ORDER BY (SELECT MIN(price) FROM rooms r WHERE r.location_id = l.id) ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  } else if (sortBy === 'distance') {
+    query += ` ORDER BY distance_km ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  }
 
   return { query, values };
 }
@@ -453,6 +511,9 @@ function buildSearchQueryWithoutCoordinates(params) {
     yearBuiltMin, yearBuiltMax,
     has_parking, has_centrala,
     roomCount, numberOfRooms,
+    busLineProximity,
+    universityLat,
+    universityLng
   } = params;
 
   let query = `
@@ -509,10 +570,34 @@ function buildSearchQueryWithoutCoordinates(params) {
     }
   }
 
+  if (busLineProximity) {
+    conditions.push(`
+      EXISTS (
+        SELECT 1 FROM rutelinii rl
+        WHERE rl.linia = $${paramIndex}
+        AND ST_DWithin(rl.geom::geography, l.geom::geography, 300)
+      )
+    `);
+    values.push(busLineProximity);
+    paramIndex++;
+  }
+
+  if (!isNaN(universityLat) && !isNaN(universityLng)) {
+    conditions.push(`
+      EXISTS (
+        SELECT 1 FROM rutelinii rl
+        JOIN statii s ON rl.ruta = s.ruta
+        WHERE ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326), 200)
+        AND ST_DWithin(rl.geom, l.geom, 300)
+      )
+    `);
+    values.push(universityLng, universityLat);
+    paramIndex += 2;
+  }
+
   if (conditions.length > 0) {
     query += ` WHERE ` + conditions.join(' AND ');
   }
-
 
   return { query, values };
 }
@@ -520,20 +605,18 @@ function buildSearchQueryWithoutCoordinates(params) {
 export const searchFilteredLocations = async (req, res) => {
   try {
     const params = parseSearchParams(req.query);
+    console.log('Parsed search params:', params);
     const hasCoords = !isNaN(params.latNum) && !isNaN(params.lngNum);
 
     if (hasCoords) {
       const { query, values } = buildSearchQueryWithCoordinates(params, true);
       const result = await pool.query(query, values);
-      console.log('Filtered locations:', result.rows);
       if (result.rows.length >= 1) {
         return res.json({ fallback: false, data: result.rows });
       }
 
-      // fallback without filters
       const fallback = buildSearchQueryWithCoordinates(params, false);
       const fallbackResult = await pool.query(fallback.query, fallback.values);
-      console.log('Fallback locations:', fallbackResult.rows);
       return res.json({ fallback: true, data: fallbackResult.rows });
     } else {
       const { query, values } = buildSearchQueryWithoutCoordinates(params);

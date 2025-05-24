@@ -75,16 +75,18 @@ const ListViewDrawer = () => {
                     setHighlightedLocation(null);
                 }}
                 variant="persistent"
-                PaperProps={{
-                    sx: {
-                        width: isMobile ? '100%' : '45vw',
-                        height: isMobile ? '50vh' : 'calc(100% - 64px)',
-                        top: isMobile ? 'auto' : '64px',
-                        zIndex: 1200,
-                        backgroundColor: '#f8f8f8',
-                        overflow: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
+                slotProps={{
+                    paper: {
+                        sx: {
+                            width: isMobile ? '100%' : '45vw',
+                            height: isMobile ? '50vh' : 'calc(100% - 64px)',
+                            top: isMobile ? 'auto' : '64px',
+                            zIndex: 1200,
+                            backgroundColor: '#f8f8f8',
+                            overflow: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                        },
                     },
                 }}
             >

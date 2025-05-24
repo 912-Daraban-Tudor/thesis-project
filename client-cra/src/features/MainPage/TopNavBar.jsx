@@ -121,11 +121,13 @@ function TopNavBar() {
         open={filterDrawerOpen}
         onClose={toggleFilterDrawer(false)}
         variant="persistent"
-        PaperProps={{
-          sx: {
-            width: 340,
-            height: 'calc(100% - 64px)', // below TopNavBar
-            top: '64px',
+        slotProps={{
+          paper: {
+            sx: {
+              width: 340,
+              height: 'calc(100% - 64px)', // below TopNavBar
+              top: '64px',
+            },
           },
         }}
       >

@@ -11,7 +11,6 @@ export const MapProvider = ({ children }) => {
         zoom: 12,
     });
 
-
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [highlightedLocation, setHighlightedLocation] = useState(null);
@@ -24,16 +23,17 @@ export const MapProvider = ({ children }) => {
         has_centrala: false,
         room_count: [],
         number_of_rooms: [],
+        bus_line: null, // e.g. "25" or "M13"
+        connected_to_university: null, // { latitude, longitude } or null
     });
 
-    const [searchCoords, setSearchCoords] = useState(null); // from SearchBoxInput
-    const [sortBy, setSortBy] = useState('price'); // "price" or "distance"
-    const [sortOrder, setSortOrder] = useState('asc'); // "asc" or "desc"
+    const [searchCoords, setSearchCoords] = useState(null);
+    const [sortBy, setSortBy] = useState('price');
+    const [sortOrder, setSortOrder] = useState('asc');
 
     const [isFallback, setIsFallback] = useState(false);
     const [listViewOpen, setListViewOpen] = useState(false);
 
-    // Build query params for backend
     const buildQueryParams = () => {
         const params = {};
 
@@ -61,8 +61,16 @@ export const MapProvider = ({ children }) => {
         }
 
         if (sortBy) params.sort = sortBy;
-
         if (sortOrder) params.order = sortOrder;
+
+        if (filters.bus_line) {
+            params.busLineProximity = filters.bus_line;
+        }
+
+        if (filters.connected_to_university) {
+            params.universityLat = filters.connected_to_university.latitude;
+            params.universityLng = filters.connected_to_university.longitude;
+        }
 
         return params;
     };
@@ -71,10 +79,10 @@ export const MapProvider = ({ children }) => {
         const fetchLocations = async () => {
             try {
                 const params = buildQueryParams();
+                console.log('🔍 Fetching locations with params:', params);
                 const response = await axios.get('/api/locations/search', { params });
-                setIsFallback(response.data.fallback); // Reset fallback state on new fetch
-                const returned = response.data.data || [];
-                setLocations(returned);
+                setIsFallback(response.data.fallback);
+                setLocations(response.data.data || []);
             } catch (error) {
                 console.error('❌ Error fetching locations:', error.message);
             }
@@ -82,7 +90,6 @@ export const MapProvider = ({ children }) => {
 
         fetchLocations();
     }, [filters, searchCoords, sortBy, sortOrder]);
-
 
     const contextValue = useMemo(
         () => ({
