@@ -10,7 +10,7 @@ import locationRoutes from './routes/locationRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; // Optional: placeholder for chatRoutes
 import imageRoutes from './routes/imageRoutes.js'; // Optional: placeholder for imageRoutes
-import pool from './models/db.js';
+import transportRoutes from './routes/transportRoutes.js'; // Optional: placeholder for transportRoutes
 
 dotenv.config();
 
@@ -30,6 +30,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/images', imageRoutes);
+app.use('/api/transport', transportRoutes);
 initSocket(server);
 
 const PORT = process.env.PORT || 5000;

@@ -8,7 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 
 const ListViewItem = ({ location, isSelected, onClick }) => {
     const navigate = useNavigate();
-    const { searchCoords } = useMapContext();
+    const { searchCoords, isFallback } = useMapContext(); // ← also check fallback state
     const { openChat } = useChatUI();
     const token = localStorage.getItem('token');
     const decodedToken = token ? jwtDecode(token) : null;
@@ -18,6 +18,9 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
     const prices = Array.isArray(location.rooms)
         ? location.rooms.map((r) => `€${r.price}`).join(', ')
         : 'Not specified';
+
+    const showDistance =
+        searchCoords && typeof location.distance_km === 'number' && !isFallback;
 
     return (
         <Card
@@ -38,9 +41,9 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
                     {location.address}
                 </Typography>
 
-                {searchCoords && typeof location.distance_km === 'number' && (
+                {showDistance && (
                     <Typography variant="body2" color="text.secondary" mt={0.5}>
-                        {Math.round(location.distance_km * 1000)} m away
+                        {Math.round(location.distance_km)} m away
                     </Typography>
                 )}
 
@@ -91,7 +94,6 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
                         View
                     </Button>
                 </Box>
-
             </CardContent>
         </Card>
     );
