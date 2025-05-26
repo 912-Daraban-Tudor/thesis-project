@@ -11,6 +11,8 @@ import roomRoutes from './routes/roomRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; // Optional: placeholder for chatRoutes
 import imageRoutes from './routes/imageRoutes.js'; // Optional: placeholder for imageRoutes
 import transportRoutes from './routes/transportRoutes.js'; // Optional: placeholder for transportRoutes
+import geocodeRoutes from './routes/geocodeRoutes.js'; // Optional: placeholder for geocodeRoutes
+
 
 dotenv.config();
 
@@ -18,9 +20,9 @@ const app = express();
 const server = http.createServer(app); // 💡 Wrap app with HTTP server
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  // allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
@@ -31,6 +33,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/transport', transportRoutes);
+app.use('/api/geocode', geocodeRoutes); // Optional: placeholder for geocodeRoutes
 initSocket(server);
 
 const PORT = process.env.PORT || 5000;

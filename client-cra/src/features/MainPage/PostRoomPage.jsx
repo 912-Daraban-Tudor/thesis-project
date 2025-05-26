@@ -35,6 +35,17 @@ function PostRoomPage() {
     description: '',
   });
 
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    floor: '',
+    number_of_rooms: '',
+    year_built: '',
+    description: '',
+    address: '',
+    rooms: [],
+  });
+
+
   const [rooms, setRooms] = useState([
     { price: '', description: '', balcony: false, sex_preference: '' }
   ]);
@@ -103,8 +114,26 @@ function PostRoomPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!apartment.address || !apartment.latitude || !apartment.longitude) {
-      setNotification({ open: true, message: 'Please search and select an address', severity: 'error' });
+    const apartmentErrors = {
+      name: apartment.name ? '' : 'Name is required',
+      address: apartment.address && apartment.latitude && apartment.longitude ? '' : 'Valid address required',
+      floor: apartment.floor ? '' : 'Floor is required',
+      year_built: apartment.year_built && !isNaN(apartment.year_built) ? '' : 'Valid year required',
+      number_of_rooms: apartment.number_of_rooms ? '' : 'Required',
+    };
+
+    const roomErrors = rooms.map((room) => ({
+      price: room.price ? '' : 'Price is required',
+      sex_preference: room.sex_preference ? '' : 'Select a preference',
+    }));
+
+    setFormErrors({ ...apartmentErrors, rooms: roomErrors });
+
+    const hasApartmentErrors = Object.values(apartmentErrors).some(Boolean);
+    const hasRoomErrors = roomErrors.some((room) => Object.values(room).some(Boolean));
+
+    if (hasApartmentErrors || hasRoomErrors) {
+      setNotification({ open: true, message: 'Fix validation errors before submitting.', severity: 'error' });
       return;
     }
 
@@ -149,6 +178,8 @@ function PostRoomPage() {
             onChange={handleApartmentChange}
             fullWidth
             required
+            error={!!formErrors.name}
+            helperText={formErrors.name}
             sx={{ mb: 2 }}
             slotProps={{ inputLabel: { shrink: true } }}
           />
@@ -158,11 +189,51 @@ function PostRoomPage() {
             editable={true}
             onAddressSelect={(data) => setApartment((prev) => ({ ...prev, address: data.address, latitude: data.latitude, longitude: data.longitude }))}
           />
+          {formErrors.address && (
+            <Typography color="error" variant="body2" sx={{ mt: -1.5, mb: 2 }}>
+              {formErrors.address}
+            </Typography>
+          )}
 
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-            <TextField label="Floor" name="floor" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.floor} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} InputLabelProps={{ shrink: true }} />
-            <TextField label="Number of Rooms" name="number_of_rooms" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.number_of_rooms} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} InputLabelProps={{ shrink: true }} />
-            <TextField label="Year Built" name="year_built" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.year_built} onChange={handleApartmentChange} sx={{ flex: 1, minWidth: '120px' }} InputLabelProps={{ shrink: true }} />
+            <TextField
+              label="Floor"
+              name="floor"
+              type="text"
+              error={!!formErrors.floor}
+              helperText={formErrors.floor}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              value={apartment.floor}
+              onChange={handleApartmentChange}
+              required
+              sx={{ flex: 1, minWidth: '120px' }}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Number of Rooms"
+              name="number_of_rooms"
+              type="text"
+              error={!!formErrors.number_of_rooms}
+              helperText={formErrors.number_of_rooms}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              value={apartment.number_of_rooms}
+              onChange={handleApartmentChange}
+              required
+              sx={{ flex: 1, minWidth: '120px' }}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="Year Built"
+              name="year_built"
+              type="text"
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              value={apartment.year_built}
+              onChange={handleApartmentChange}
+              error={!!formErrors.year_built}
+              helperText={formErrors.year_built}
+              sx={{ flex: 1, minWidth: '120px' }}
+              InputLabelProps={{ shrink: true }}
+            />
           </Box>
 
           <TextField label="Description" name="description" value={apartment.description} onChange={handleApartmentChange} multiline rows={3} fullWidth sx={{ mb: 2 }} InputLabelProps={{ shrink: true }} />
@@ -255,14 +326,30 @@ function PostRoomPage() {
               <Typography variant="subtitle1" sx={{ mb: 2, color: '#4a7ebb' }}>Room {index + 1}</Typography>
 
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-                <TextField label="Price (€)" name="price" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={room.price} onChange={(e) => handleRoomChange(index, e)} required sx={{ flex: 1, minWidth: '120px' }} InputLabelProps={{ shrink: true }} />
-                <FormControl variant="outlined" sx={{ flex: 1, minWidth: '150px' }}>
+                <TextField
+                  label="Price (€)"
+                  name="price"
+                  type="text"
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                  value={room.price}
+                  onChange={(e) => handleRoomChange(index, e)}
+                  error={!!formErrors.rooms[index]?.price}
+                  helperText={formErrors.rooms[index]?.price}
+                  required
+                  sx={{ flex: 1, minWidth: '120px' }}
+                  InputLabelProps={{ shrink: true }}
+                />
+                <FormControl error={!!formErrors.rooms[index]?.sex_preference} variant="outlined" sx={{ flex: 1, minWidth: '150px' }}>
                   <InputLabel id={`gender-preference-label-${index}`} htmlFor={`gender-preference-select-${index}`}>Gender preference</InputLabel>
-                  <Select labelId={`gender-preference-label-${index}`} id={`gender-preference-select-${index}`} name="sex_preference" value={room.sex_preference || 'not specified'} label="Gender preference" onChange={(e) => handleRoomChange(index, { ...e, target: { ...e.target, value: e.target.value || 'not specified' } })}>
+                  <Select labelId={`gender-preference-label-${index}`} id={`gender-preference-select-${index}`} name="sex_preference" value={room.sex_preference || 'not specified'} label="Prefered Gender" onChange={(e) => handleRoomChange(index, { ...e, target: { ...e.target, value: e.target.value || 'not specified' } })}>
                     <MenuItem value="not specified"><em>Not specified</em></MenuItem>
-                    <MenuItem value="M">Male</MenuItem>
-                    <MenuItem value="F">Female</MenuItem>
+                    <MenuItem value="Male">Male</MenuItem>
+                    <MenuItem value="Female">Female</MenuItem>
+                    <MenuItem value="Any">Any</MenuItem>
                   </Select>
+                  <Typography variant="caption" color="error">
+                    {formErrors.rooms[index]?.sex_preference}
+                  </Typography>
                 </FormControl>
               </Box>
 

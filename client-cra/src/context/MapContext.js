@@ -25,6 +25,7 @@ export const MapProvider = ({ children }) => {
         number_of_rooms: [],
         bus_line: null, // e.g. "25" or "M13"
         connected_to_university: null, // { latitude, longitude } or null
+        sex_preference: null,
     });
 
     const [searchCoords, setSearchCoords] = useState(null);
@@ -59,6 +60,10 @@ export const MapProvider = ({ children }) => {
         if (filters.number_of_rooms.length > 0) {
             params.numberOfRooms = filters.number_of_rooms.join(',');
         }
+        if (filters.sex_preference) {
+            params.sex_preference = filters.sex_preference;
+        }
+
 
         if (sortBy) params.sort = sortBy;
         if (sortOrder) params.order = sortOrder;

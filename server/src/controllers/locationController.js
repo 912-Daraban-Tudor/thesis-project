@@ -383,6 +383,7 @@ function parseSearchParams(query) {
     busLineProximity: query.busLineProximity || null,
     universityLat: parseFloat(query.universityLat),
     universityLng: parseFloat(query.universityLng),
+    sex_preference: query.sex_preference || null,
   };
 }
 
@@ -397,7 +398,8 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     sortBy, sortOrder,
     busLineProximity,
     universityLat,
-    universityLng
+    universityLng,
+    sex_preference
   } = params;
 
   let query = `
@@ -464,6 +466,18 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
         values.push(...totals);
       }
     }
+    if (sex_preference) {
+      conditions.push(`
+    EXISTS (
+      SELECT 1 FROM rooms r
+      WHERE r.location_id = l.id
+      AND r.sex_preference = $${paramIndex}
+    )
+  `);
+      values.push(sex_preference);
+      paramIndex++;
+    }
+
 
     if (busLineProximity) {
       conditions.push(`
@@ -513,7 +527,8 @@ function buildSearchQueryWithoutCoordinates(params) {
     roomCount, numberOfRooms,
     busLineProximity,
     universityLat,
-    universityLng
+    universityLng,
+    sex_preference
   } = params;
 
   let query = `
@@ -569,6 +584,18 @@ function buildSearchQueryWithoutCoordinates(params) {
       values.push(...totals);
     }
   }
+  if (sex_preference) {
+    conditions.push(`
+    EXISTS (
+      SELECT 1 FROM rooms r
+      WHERE r.location_id = l.id
+      AND r.sex_preference = $${paramIndex}
+    )
+  `);
+    values.push(sex_preference);
+    paramIndex++;
+  }
+
 
   if (busLineProximity) {
     conditions.push(`
@@ -586,9 +613,16 @@ function buildSearchQueryWithoutCoordinates(params) {
     conditions.push(`
       EXISTS (
         SELECT 1 FROM rutelinii rl
-        JOIN statii s ON rl.ruta = s.ruta
-        WHERE ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326), 200)
-        AND ST_DWithin(rl.geom, l.geom, 300)
+        WHERE ST_DWithin(
+          rl.geom::geography,
+          ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
+          200
+        )
+        AND ST_DWithin(
+          rl.geom::geography,
+          l.geom::geography,
+          200
+        )
       )
     `);
     values.push(universityLng, universityLat);
@@ -621,6 +655,7 @@ export const searchFilteredLocations = async (req, res) => {
     } else {
       const { query, values } = buildSearchQueryWithoutCoordinates(params);
       const result = await pool.query(query, values);
+      console.log('Search result without coordinates:', result.rows[1]);
       return res.json({ fallback: false, data: result.rows });
     }
 
