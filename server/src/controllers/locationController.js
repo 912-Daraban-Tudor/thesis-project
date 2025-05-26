@@ -106,8 +106,6 @@ export const getLocations = async (req, res) => {
         FROM locations l
       `);
     res.json(result.rows);
-    console.log('Locations:', result.rows);
-    console.log('Locations:', result.rows[1]);
   } catch (err) {
     console.error('Error fetching locations:', err);
     res.status(500).json({ message: 'Server error while fetching locations.' });
@@ -639,7 +637,6 @@ function buildSearchQueryWithoutCoordinates(params) {
 export const searchFilteredLocations = async (req, res) => {
   try {
     const params = parseSearchParams(req.query);
-    console.log('Parsed search params:', params);
     const hasCoords = !isNaN(params.latNum) && !isNaN(params.lngNum);
 
     if (hasCoords) {
@@ -655,7 +652,6 @@ export const searchFilteredLocations = async (req, res) => {
     } else {
       const { query, values } = buildSearchQueryWithoutCoordinates(params);
       const result = await pool.query(query, values);
-      console.log('Search result without coordinates:', result.rows[1]);
       return res.json({ fallback: false, data: result.rows });
     }
 

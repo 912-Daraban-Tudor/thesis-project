@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
 import {
-    TextField, Checkbox, Button, Typography, Divider, Box, MenuItem,
+    TextField, CircularProgress, Checkbox, Button, Typography, Divider, Box, MenuItem,
     FormControl, FormControlLabel, InputLabel, Select, IconButton, Snackbar, Alert
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,6 +15,7 @@ function EditPostPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [apartment, setApartment] = useState(state?.apartment || null);
     const [rooms, setRooms] = useState(state?.rooms || []);
     const [existingImageUrls, setExistingImageUrls] = useState([]);
@@ -54,13 +55,13 @@ function EditPostPage() {
 
     const handleApartmentChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setApartment((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        setApartment((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value.trim() }));
     };
 
     const handleRoomChange = (index, e) => {
         const { name, value, type, checked } = e.target;
         const updatedRooms = [...rooms];
-        updatedRooms[index][name] = type === 'checkbox' ? checked : value;
+        updatedRooms[index][name] = type === 'checkbox' ? checked : value.trim();
         setRooms(updatedRooms);
     };
 
@@ -104,7 +105,7 @@ function EditPostPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        setIsSubmitting(true);
         const errors = {
             name: !apartment.name ? 'Required' : '',
             address: (!apartment.address || !apartment.latitude || !apartment.longitude) ? 'Please select a valid address' : '',
@@ -146,6 +147,8 @@ function EditPostPage() {
         } catch (err) {
             console.error('Update error:', err);
             setNotification({ open: true, message: 'Failed to update. Try again.', severity: 'error' });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -310,8 +313,25 @@ function EditPostPage() {
                         Add Another Room
                     </Button>
 
-                    <Button variant="contained" color="primary" type="submit" size="large" sx={{ backgroundColor: '#4a7ebb', borderRadius: 2, fontWeight: 500, '&:hover': { backgroundColor: '#3a6ca8' } }} fullWidth>
-                        Save Changes
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        type="submit"
+                        size="large"
+                        disabled={isSubmitting}
+                        sx={{
+                            backgroundColor: '#4a7ebb',
+                            borderRadius: 2,
+                            fontWeight: 500,
+                            '&:hover': { backgroundColor: '#3a6ca8' },
+                        }}
+                        fullWidth
+                    >
+                        {isSubmitting ? (
+                            <CircularProgress size={24} color="inherit" />
+                        ) : (
+                            'Save Changes'
+                        )}
                     </Button>
                 </form>
 

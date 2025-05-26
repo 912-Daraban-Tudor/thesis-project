@@ -9,6 +9,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  CircularProgress,
   Select,
   IconButton,
   Divider,
@@ -45,6 +46,7 @@ function PostRoomPage() {
     rooms: [],
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [rooms, setRooms] = useState([
     { price: '', description: '', balcony: false, sex_preference: '' }
@@ -114,6 +116,7 @@ function PostRoomPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const apartmentErrors = {
       name: apartment.name ? '' : 'Name is required',
       address: apartment.address && apartment.latitude && apartment.longitude ? '' : 'Valid address required',
@@ -149,6 +152,8 @@ function PostRoomPage() {
     } catch (err) {
       console.error('Error posting apartment & rooms:', err);
       setNotification({ open: true, message: 'Failed to post apartment. Please try again.', severity: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -365,9 +370,27 @@ function PostRoomPage() {
             Add Another Room
           </Button>
 
-          <Button variant="contained" color="primary" type="submit" size="large" sx={{ backgroundColor: '#4a7ebb', borderRadius: 2, fontWeight: 500, '&:hover': { backgroundColor: '#3a6ca8' } }} fullWidth>
-            Post Apartment & Rooms
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            size="large"
+            disabled={isSubmitting}
+            sx={{
+              backgroundColor: '#4a7ebb',
+              borderRadius: 2,
+              fontWeight: 500,
+              '&:hover': { backgroundColor: '#3a6ca8' },
+            }}
+            fullWidth
+          >
+            {isSubmitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Post Apartment & Rooms'
+            )}
           </Button>
+
         </form>
 
         <Snackbar open={notification.open} autoHideDuration={6000} onClose={handleCloseNotification} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
