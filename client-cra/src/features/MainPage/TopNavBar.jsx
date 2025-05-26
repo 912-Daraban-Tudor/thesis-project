@@ -124,7 +124,7 @@ function TopNavBar() {
         slotProps={{
           paper: {
             sx: {
-              width: 340,
+              width: 360,
               height: 'calc(100% - 64px)', // below TopNavBar
               top: '64px',
             },
@@ -177,11 +177,6 @@ function TopNavBar() {
             }}
           >
             <FilterPanel />
-            <Box mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Filters automatically apply on submit.
-              </Typography>
-            </Box>
           </Box>
         </Box>
       </Drawer>

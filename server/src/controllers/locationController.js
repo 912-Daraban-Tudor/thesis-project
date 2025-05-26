@@ -106,8 +106,6 @@ export const getLocations = async (req, res) => {
         FROM locations l
       `);
     res.json(result.rows);
-    console.log('Locations:', result.rows);
-    console.log('Locations:', result.rows[1]);
   } catch (err) {
     console.error('Error fetching locations:', err);
     res.status(500).json({ message: 'Server error while fetching locations.' });
@@ -383,6 +381,7 @@ function parseSearchParams(query) {
     busLineProximity: query.busLineProximity || null,
     universityLat: parseFloat(query.universityLat),
     universityLng: parseFloat(query.universityLng),
+    sex_preference: query.sex_preference || null,
   };
 }
 
@@ -397,7 +396,8 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     sortBy, sortOrder,
     busLineProximity,
     universityLat,
-    universityLng
+    universityLng,
+    sex_preference
   } = params;
 
   let query = `
@@ -464,6 +464,18 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
         values.push(...totals);
       }
     }
+    if (sex_preference) {
+      conditions.push(`
+    EXISTS (
+      SELECT 1 FROM rooms r
+      WHERE r.location_id = l.id
+      AND r.sex_preference = $${paramIndex}
+    )
+  `);
+      values.push(sex_preference);
+      paramIndex++;
+    }
+
 
     if (busLineProximity) {
       conditions.push(`
@@ -513,7 +525,8 @@ function buildSearchQueryWithoutCoordinates(params) {
     roomCount, numberOfRooms,
     busLineProximity,
     universityLat,
-    universityLng
+    universityLng,
+    sex_preference
   } = params;
 
   let query = `
@@ -569,6 +582,18 @@ function buildSearchQueryWithoutCoordinates(params) {
       values.push(...totals);
     }
   }
+  if (sex_preference) {
+    conditions.push(`
+    EXISTS (
+      SELECT 1 FROM rooms r
+      WHERE r.location_id = l.id
+      AND r.sex_preference = $${paramIndex}
+    )
+  `);
+    values.push(sex_preference);
+    paramIndex++;
+  }
+
 
   if (busLineProximity) {
     conditions.push(`
@@ -586,9 +611,16 @@ function buildSearchQueryWithoutCoordinates(params) {
     conditions.push(`
       EXISTS (
         SELECT 1 FROM rutelinii rl
-        JOIN statii s ON rl.ruta = s.ruta
-        WHERE ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326), 200)
-        AND ST_DWithin(rl.geom, l.geom, 300)
+        WHERE ST_DWithin(
+          rl.geom::geography,
+          ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
+          200
+        )
+        AND ST_DWithin(
+          rl.geom::geography,
+          l.geom::geography,
+          200
+        )
       )
     `);
     values.push(universityLng, universityLat);
@@ -605,7 +637,6 @@ function buildSearchQueryWithoutCoordinates(params) {
 export const searchFilteredLocations = async (req, res) => {
   try {
     const params = parseSearchParams(req.query);
-    console.log('Parsed search params:', params);
     const hasCoords = !isNaN(params.latNum) && !isNaN(params.lngNum);
 
     if (hasCoords) {

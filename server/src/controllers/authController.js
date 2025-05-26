@@ -156,7 +156,6 @@ export const updateUserInfo = async (req, res) => {
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ message: "Username already in use by another account." });
     }
-    console.log(username, gender, profilePictureUrl);
     // Update user info
     await pool.query(
       'UPDATE users SET username = $1, gender = $2, profile_picture_url = $3 WHERE id = $4',

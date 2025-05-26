@@ -28,7 +28,7 @@ function App() {
     <Router>
       <MapboxProvider>
         <ChatProvider>
-          <ChatUIContext.Provider value={{ openChat }}>
+          <ChatUIContext.Provider value={{ openChat, closeChat: () => setChatOpen(false) }}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from './TopNavBar';
 import MapView from './MapView';
@@ -8,21 +8,42 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { MapProvider } from '../../context/MapContext';
 import ListViewDrawer from '../../components/ListViewDrawer';
 import { useChatUI } from '../../context/ChatUIContext';
+import SafetyDialog from '../../components/SafetyDialog';
+import { jwtDecode } from 'jwt-decode';
 
 function MainPage() {
   const navigate = useNavigate();
   const { openChat } = useChatUI();
+  const [safetyDialogOpen, setSafetyDialogOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
+    if (!token || jwtDecode(token).exp * 1000 < Date.now()) {
       navigate('/login');
+    }
+
+    const hasSeenDialog = localStorage.getItem('seen_safety_dialog');
+    if (!hasSeenDialog) {
+      setSafetyDialogOpen(true);
     }
   }, [navigate]);
 
+  const handleCloseDialog = () => {
+    localStorage.setItem('seen_safety_dialog', 'true');
+    setSafetyDialogOpen(false);
+  };
+
   return (
     <MapProvider>
-      <div style={{ height: '100vh', width: '100vw', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          height: '100vh',
+          width: '100vw',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <TopNavBar />
         <div style={{ flex: 1, position: 'relative' }}>
           <ListViewDrawer />
@@ -33,7 +54,12 @@ function MainPage() {
             <Fab
               color="default"
               size="medium"
-              sx={{ position: 'absolute', bottom: 88, right: 16, bgcolor: 'white' }}
+              sx={{
+                position: 'absolute',
+                bottom: 88,
+                right: 16,
+                bgcolor: 'white',
+              }}
               onClick={() => openChat()}
             >
               <MailOutlineIcon />
@@ -52,6 +78,8 @@ function MainPage() {
             </Fab>
           </Tooltip>
         </div>
+
+        <SafetyDialog open={safetyDialogOpen} onClose={handleCloseDialog} />
       </div>
     </MapProvider>
   );
