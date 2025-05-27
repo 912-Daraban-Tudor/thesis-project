@@ -51,9 +51,19 @@ export const ChatProvider = ({ children }) => {
         setMessages(res.data);
     }, []);
 
-    const sendMessage = useCallback(({ recipientId, content }) => {
-        socket.emit('send_message', { recipientId, content });
+    const sendMessage = useCallback(async ({ recipientId, content }) => {
+        try {
+            const res = await axios.post(`/api/chats/conversations/${recipientId}/messages`, {
+                content,
+            });
+
+            // Optional: emit new message over WebSocket if you want real-time delivery
+            socket.emit('new_message', res.data); // Your backend must listen to this event if needed
+        } catch (err) {
+            console.error('Failed to send message:', err);
+        }
     }, []);
+
 
     // Memoize context value
     const contextValue = useMemo(() => ({
