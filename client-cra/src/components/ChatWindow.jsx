@@ -72,18 +72,21 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                 handleSelectConversation(existing);
             } else {
                 await sendMessage({ recipientId: recipient.id, content: '👋' });
-                setTimeout(async () => {
-                    await loadConversations();
-                    const newConv = conversations.find(
-                        (c) =>
-                            (c.user1_id === recipient.id && c.user2_id === me) ||
-                            (c.user2_id === recipient.id && c.user1_id === me)
-                    );
-                    if (newConv) handleSelectConversation(newConv);
-                }, 500);
+                await loadConversations();
+                const updated = await axios.get('/api/chats/conversations'); // force fresh
+                const newConv = updated.data.find(
+                    (c) =>
+                        (c.user1_id === recipient.id && c.user2_id === me) ||
+                        (c.user2_id === recipient.id && c.user1_id === me)
+                );
+                if (newConv) {
+                    setActiveConversation(newConv);
+                    setView('chat');
+                }
             }
         } catch {
             console.error('User not found');
+            alert('No user with that username was found.');
         }
     };
 

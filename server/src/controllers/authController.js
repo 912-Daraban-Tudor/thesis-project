@@ -174,7 +174,7 @@ export const updateUserInfo = async (req, res) => {
 export const getUserByUsername = async (req, res) => {
   const { username } = req.params;
   try {
-    const result = await pool.query('SELECT id, username FROM users WHERE username = $1', [username]);
+    const result = await pool.query('SELECT id, username FROM users WHERE LOWER(username) = LOWER($1)', [username]);
     if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
     res.json(result.rows[0]);
   } catch (err) {
