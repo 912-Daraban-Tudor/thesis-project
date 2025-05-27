@@ -33,6 +33,7 @@ export const ChatProvider = ({ children }) => {
                     setMessages((prev) => [...prev, message]);
                 } else {
                     setHasUnread(true);
+                    loadConversations();
                 }
             });
         }

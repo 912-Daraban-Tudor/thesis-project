@@ -77,9 +77,12 @@ function MainPage() {
                 right: 24,
                 backgroundColor: '#f5efe6',
                 color: '#333',
-                fontWeight: 600,
-                borderRadius: '12px',
+                fontWeight: 700,
+                fontSize: '1.1rem',            // ⬅️ Bigger text
+                padding: '12px 24px',          // ⬅️ Taller and wider
+                borderRadius: '16px',
                 boxShadow: 3,
+                minWidth: '180px',             // ⬅️ Wider minimum width
                 textTransform: 'none',
                 '&:hover': {
                   backgroundColor: '#e0dbd1',
@@ -89,6 +92,7 @@ function MainPage() {
             >
               Post a Room
             </Button>
+
           </Tooltip>
         </div>
 
