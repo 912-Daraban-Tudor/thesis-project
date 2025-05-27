@@ -184,7 +184,7 @@ function PostRoomPage() {
         <Typography variant="h4" sx={{ color: '#4a7ebb', textAlign: 'center' }}>Post Apartment</Typography>
 
         <form onSubmit={handleSubmit}>
-          <Typography variant="h6" sx={{ mb: 1 }}>Apartment Details</Typography>
+          <Typography variant="h6" sx={{ color: '#4a7ebb', mb: 1 }}>Apartment Details</Typography>
           <Divider sx={{ mb: 2 }} />
 
           <TextField

@@ -252,9 +252,6 @@ function ApartmentPage() {
                   <Typography variant="body2">
                     <strong>Gender Preference:</strong> {room.sex_preference || 'None'}
                   </Typography>
-                  <Typography variant="body2">
-                    <strong>Available:</strong> {room.available ? 'Yes' : 'No'}
-                  </Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>
                     <strong>Description:</strong> {room.description}
                   </Typography>
