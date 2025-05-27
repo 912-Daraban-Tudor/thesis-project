@@ -17,7 +17,7 @@ services:
     image: postgis/postgis:15-3.3
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: shegmant
+      POSTGRES_PASSWORD: #
       POSTGRES_DB: student_rooms
     ports:
       - "5432:5432"
