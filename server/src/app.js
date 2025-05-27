@@ -27,6 +27,7 @@ app.use(compression());
 
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://awesome-room-finder.up.railway.app'
 ];
 app.use(cors({
   origin: (origin, callback) => {
