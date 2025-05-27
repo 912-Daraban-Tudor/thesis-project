@@ -13,7 +13,7 @@ import PostRoomPage from './features/MainPage/PostRoomPage';
 import ApartmentPage from './features/MainPage/ApartmentPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ChatProvider } from './context/ChatContext';
-import 'react-image-lightbox/style.css';
+import 'yet-another-react-lightbox/styles.css';
 
 function App() {
   const [chatOpen, setChatOpen] = useState(false);
