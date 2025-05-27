@@ -136,7 +136,19 @@ function PostRoomPage() {
     const hasRoomErrors = roomErrors.some((room) => Object.values(room).some(Boolean));
 
     if (hasApartmentErrors || hasRoomErrors) {
-      setNotification({ open: true, message: 'Fix validation errors before submitting.', severity: 'error' });
+      const firstApartmentError = Object.values(apartmentErrors).find(Boolean);
+      const firstRoomError = roomErrors
+        .map((r) => Object.values(r).find(Boolean))
+        .find(Boolean);
+
+      const firstError = firstApartmentError || firstRoomError || 'Fix validation errors.';
+
+      setNotification({
+        open: true,
+        message: firstError,
+        severity: 'error',
+      });
+      setIsSubmitting(false);
       return;
     }
 
