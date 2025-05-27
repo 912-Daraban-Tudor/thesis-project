@@ -15,8 +15,8 @@ import {
 import ReactMapGL, { Marker } from 'react-map-gl';
 import { useChatUI } from '../../context/ChatUIContext';
 import { jwtDecode } from 'jwt-decode';
-import Lightbox from 'react-image-lightbox';
-import 'react-image-lightbox/style.css';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 
 function ApartmentPage() {
   const navigate = useNavigate();
@@ -94,7 +94,6 @@ function ApartmentPage() {
             gap: 2,
           }}
         >
-          {/* Left side: Apartment details */}
           <Box sx={{ flex: 1 }}>
             <Typography variant="h4" sx={{ color: '#4a7ebb', mb: 1 }}>{apartment.name}</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>{apartment.address}</Typography>
@@ -169,7 +168,6 @@ function ApartmentPage() {
             )}
           </Box>
 
-          {/* Right side: Compact image grid */}
           <Box
             sx={{
               width: 180,
@@ -202,9 +200,7 @@ function ApartmentPage() {
               />
             ))}
           </Box>
-
         </Box>
-
 
         <Box
           sx={{
@@ -269,18 +265,14 @@ function ApartmentPage() {
         </Grid>
       </Box>
 
+      {/* ✅ Updated Lightbox */}
       {isLightboxOpen && images.length > 0 && (
         <Lightbox
-          mainSrc={images[lightboxIndex]}
-          nextSrc={images[(lightboxIndex + 1) % images.length]}
-          prevSrc={images[(lightboxIndex + images.length - 1) % images.length]}
-          onCloseRequest={() => setIsLightboxOpen(false)}
-          onMovePrevRequest={() =>
-            setLightboxIndex((lightboxIndex + images.length - 1) % images.length)
-          }
-          onMoveNextRequest={() =>
-            setLightboxIndex((lightboxIndex + 1) % images.length)
-          }
+          open={isLightboxOpen}
+          close={() => setIsLightboxOpen(false)}
+          index={lightboxIndex}
+          slides={images.map((url) => ({ src: url }))}
+          carousel={{ finite: true }}
         />
       )}
     </Box>
