@@ -26,6 +26,7 @@ export const ChatProvider = ({ children }) => {
             socket.connect();
 
             socket.on('new_message', (message) => {
+                console.log('📥 Received message via socket:', message);
                 if (message.conversation_id === activeConversation?.id) {
                     setMessages((prev) => [...prev, message]);
                 } else {
@@ -52,17 +53,39 @@ export const ChatProvider = ({ children }) => {
     }, []);
 
     const sendMessage = useCallback(async ({ recipientId, content }) => {
+        const tempMessage = {
+            id: `temp-${Date.now()}`,
+            conversation_id: activeConversation?.id,
+            sender_id: me,
+            content,
+            created_at: new Date().toISOString(),
+        };
+
+        if (activeConversation?.id) {
+            setMessages((prev) => [...prev, tempMessage]);
+        }
+
         try {
             const res = await axios.post(`/api/chats/conversations/${recipientId}/messages`, {
                 content,
             });
 
-            // Optional: emit new message over WebSocket if you want real-time delivery
-            socket.emit('new_message', res.data); // Your backend must listen to this event if needed
+            const msg = res.data;
+
+            // Replace temp message? (optional)
+            setMessages((prev) => [
+                ...prev.filter((m) => m.id !== tempMessage.id),
+                msg,
+            ]);
+
+            // Optional: forward via WebSocket too
+            socket.emit('new_message', msg);
         } catch (err) {
             console.error('Failed to send message:', err);
+            // Optionally: remove temp message or show error
         }
-    }, []);
+    }, [activeConversation, me]);
+
 
 
     // Memoize context value

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from './TopNavBar';
 import MapView from './MapView';
-import { Fab, Tooltip } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Fab, Tooltip, Button } from '@mui/material';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { MapProvider } from '../../context/MapContext';
 import ListViewDrawer from '../../components/ListViewDrawer';
@@ -66,16 +66,29 @@ function MainPage() {
             </Fab>
           </Tooltip>
 
-          {/* Post Button */}
-          <Tooltip title="Post a room">
-            <Fab
-              color="primary"
-              aria-label="post"
-              sx={{ position: 'absolute', bottom: 16, right: 16 }}
+          <Tooltip title="Post a Room">
+            <Button
+              variant="contained"
+              startIcon={<PostAddIcon />}
               onClick={() => navigate('/post')}
+              sx={{
+                position: 'fixed',
+                bottom: 24,
+                right: 24,
+                backgroundColor: '#f5efe6',
+                color: '#333',
+                fontWeight: 600,
+                borderRadius: '12px',
+                boxShadow: 3,
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: '#e0dbd1',
+                  boxShadow: 4,
+                },
+              }}
             >
-              <AddIcon />
-            </Fab>
+              Post a Room
+            </Button>
           </Tooltip>
         </div>
 
