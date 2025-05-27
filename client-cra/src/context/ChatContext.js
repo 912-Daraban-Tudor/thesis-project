@@ -9,6 +9,7 @@ import React, {
 import socket from '../api/socket';
 import axios from '../api/axiosInstance';
 import PropTypes from 'prop-types';
+import { jwtDecode } from 'jwt-decode';
 
 const ChatContext = createContext();
 
@@ -17,7 +18,8 @@ export const ChatProvider = ({ children }) => {
     const [activeConversation, setActiveConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const [hasUnread, setHasUnread] = useState(false);
-
+    const token = localStorage.getItem('token');
+    const me = token ? jwtDecode(token).id : null;
     // Connect to socket and listen for new messages
     useEffect(() => {
         const token = localStorage.getItem('token');
