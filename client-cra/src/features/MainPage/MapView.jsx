@@ -7,7 +7,6 @@ import MapLegend from '../../components/MapLegend';
 import { flyToWithOffset } from '../../utils/mapUtils';
 import { useMediaQuery, useTheme } from '@mui/material';
 
-
 const MapView = () => {
   const {
     viewState,
