@@ -82,7 +82,7 @@ function MainPage() {
                 padding: '12px 24px',          // ⬅️ Taller and wider
                 borderRadius: '16px',
                 boxShadow: 3,
-                minWidth: '180px',             // ⬅️ Wider minimum width
+                minWidth: '170px',             // ⬅️ Wider minimum width
                 textTransform: 'none',
                 '&:hover': {
                   backgroundColor: '#e0dbd1',

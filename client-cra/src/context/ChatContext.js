@@ -27,15 +27,20 @@ export const ChatProvider = ({ children }) => {
             socket.auth = { token };
             socket.connect();
 
-            socket.on('new_message', (message) => {
+            socket.on('new_message', async (message) => {
                 console.log('📥 Received message via socket:', message);
+
+                await loadConversations();
+
                 if (message.conversation_id === activeConversation?.id) {
                     setMessages((prev) => [...prev, message]);
+                } else if (!activeConversation) {
+                    setHasUnread(true);
                 } else {
                     setHasUnread(true);
-                    loadConversations();
                 }
             });
+
         }
 
         return () => {
