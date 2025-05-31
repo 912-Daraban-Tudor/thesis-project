@@ -46,7 +46,7 @@ const MapView = () => {
         onMove={(evt) => setViewState(evt.viewState)}
         onClick={() => { setHighlightedLocation(null); setSelectedLocation(null) }}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="mapbox://styles/mapbox/streets-v11"
         getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'grab')}
         style={{ width: '100%', height: '100%' }}
       >

@@ -128,7 +128,7 @@ function AccountPage() {
           padding: 4,
           maxWidth: 460,
           width: '100%',
-          bgcolor: '#fefaf1',
+          bgcolor: '#f4ead5',
           borderRadius: 4,
           textAlign: 'left',
           overflowWrap: 'break-word',
