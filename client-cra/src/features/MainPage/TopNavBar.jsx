@@ -8,19 +8,27 @@ import {
   MenuItem,
   Box,
   Drawer,
+  Button,
   Typography,
+  Badge,
+  Fade,
 } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import SearchBoxInput from '../../components/SearchBoxInput';
-import FilterPanel from '../../components/FilterPanel';
+import ApartmentFilters from '../../components/ApartmentFilters';
+import TransportFilters from '../../components/TransportFilters';
+import { useMapContext } from '../../context/MapContext';
 
 function TopNavBar() {
   const navigate = useNavigate();
+  const { filters } = useMapContext();
 
   const [anchorElProfile, setAnchorElProfile] = useState(null);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterMode, setFilterMode] = useState('apartment');
 
   const handleProfileOpen = (event) => setAnchorElProfile(event.currentTarget);
   const handleProfileClose = () => setAnchorElProfile(null);
@@ -29,8 +37,6 @@ function TopNavBar() {
     navigate('/account');
     handleProfileClose();
   };
-
-
 
   const handleMyPostsClick = () => {
     navigate('/my-posts');
@@ -43,44 +49,67 @@ function TopNavBar() {
     navigate('/login');
   };
 
-  const toggleFilterDrawer = (open) => () => {
-    setFilterDrawerOpen(open);
+  const openDrawer = (mode) => {
+    setFilterMode(mode);
+    setFilterDrawerOpen(true);
   };
+
+  const closeDrawer = () => setFilterDrawerOpen(false);
+
+  // Compute badges
+  const countApartmentFilters = [
+    filters.price?.[0] > 0 || filters.price?.[1] < 2000,
+    filters.floor?.[0] > 0 || filters.floor?.[1] < 10,
+    filters.year_built?.[0] > 1900 || filters.year_built?.[1] < new Date().getFullYear(),
+    filters.has_parking,
+    filters.has_centrala,
+    (filters.room_count || []).length > 0,
+    (filters.number_of_rooms || []).length > 0,
+    filters.sex_preference,
+  ].filter(Boolean).length;
+
+  const countTransportFilters = [
+    filters.bus_line,
+    filters.connected_to_university,
+  ].filter(Boolean).length;
 
   return (
     <>
-      <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#333' }}>
+      <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#2D3E50' }}>
         <Toolbar>
-          {/* Menu button */}
-
-          {/* Center: Search + Filters */}
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
             <SearchBoxInput />
 
-            <IconButton
-              size="large"
-              color="inherit"
-              onClick={toggleFilterDrawer(true)}
-              sx={{ ml: 1 }}
-            >
-              <TuneIcon />
-            </IconButton>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Badge badgeContent={countApartmentFilters} color="secondary">
+                <Button
+                  variant={filterMode === 'apartment' ? 'contained' : 'outlined'}
+                  color="primary"
+                  startIcon={<FilterAltIcon />}
+                  onClick={() => openDrawer('apartment')}
+                >
+                  Apartment Filters
+                </Button>
+              </Badge>
+
+              <Badge badgeContent={countTransportFilters} color="secondary">
+                <Button
+                  variant={filterMode === 'transport' ? 'contained' : 'outlined'}
+                  color="primary"
+                  startIcon={<DirectionsBusIcon />}
+                  onClick={() => openDrawer('transport')}
+                >
+                  Transport Filters
+                </Button>
+              </Badge>
+            </Box>
           </Box>
 
-          {/* Profile icon */}
-          <IconButton
-            size="large"
-            color="inherit"
-            onClick={handleProfileOpen}
-          >
+          <IconButton size="large" color="inherit" onClick={handleProfileOpen}>
             <AccountCircle />
           </IconButton>
 
-          <Menu
-            anchorEl={anchorElProfile}
-            open={Boolean(anchorElProfile)}
-            onClose={handleProfileClose}
-          >
+          <Menu anchorEl={anchorElProfile} open={Boolean(anchorElProfile)} onClose={handleProfileClose}>
             <MenuItem onClick={handleProfileClick}>My Account</MenuItem>
             <MenuItem onClick={handleMyPostsClick}>My Posts</MenuItem>
             <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
@@ -88,73 +117,57 @@ function TopNavBar() {
         </Toolbar>
       </AppBar>
 
-      {/* Right-side drawer for filters */}
       <Drawer
         anchor="right"
         open={filterDrawerOpen}
-        onClose={toggleFilterDrawer(false)}
+        onClose={closeDrawer}
         variant="persistent"
         slotProps={{
           paper: {
             sx: {
               width: 360,
-              height: 'calc(100% - 64px)', // below TopNavBar
+              height: 'calc(100% - 64px)',
               top: '64px',
             },
           },
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-          }}
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            px={2}
-            pt={2}
-            pb={1}
-          >
-            <Typography variant="h6">Filters</Typography>
-            <IconButton onClick={toggleFilterDrawer(false)} size="small">
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" px={2} pt={2} pb={1}>
+            <Typography variant="h6">
+              {filterMode === 'apartment' ? 'Apartment & Room Filters' : 'Transport Filters'}
+            </Typography>
+            <IconButton onClick={closeDrawer} size="small">
               <CloseIcon />
             </IconButton>
           </Box>
 
-          {/* 🧠 Scrollable container with custom scrollbar */}
           <Box
             sx={{
               flex: 1,
               overflow: 'auto',
               px: 2,
               pb: 2,
-              '&::-webkit-scrollbar': {
-                width: '8px',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#ccc',
-                borderRadius: '4px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                backgroundColor: '#aaa',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: '#f2f2f2',
-              },
+              '&::-webkit-scrollbar': { width: '8px' },
+              '&::-webkit-scrollbar-thumb': { backgroundColor: '#ccc', borderRadius: '4px' },
+              '&::-webkit-scrollbar-thumb:hover': { backgroundColor: '#aaa' },
+              '&::-webkit-scrollbar-track': { backgroundColor: '#f2f2f2' },
               scrollbarWidth: 'thin',
               scrollbarColor: '#ccc #f2f2f2',
             }}
           >
-            <FilterPanel />
+            <Fade in timeout={300}>
+              <Box>
+                {filterMode === 'apartment' ? (
+                  <ApartmentFilters onApplyComplete={closeDrawer} />
+                ) : (
+                  <TransportFilters />
+                )}
+              </Box>
+            </Fade>
           </Box>
         </Box>
       </Drawer>
-
-
     </>
   );
 }
