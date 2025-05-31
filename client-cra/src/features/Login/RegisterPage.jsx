@@ -59,6 +59,7 @@ function RegisterPage() {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
+      width="100vw"
       bgcolor="#f5f5f5"
       px={2}
     >
@@ -67,7 +68,7 @@ function RegisterPage() {
         sx={{
           p: 4,
           width: '100%',
-          maxWidth: 400,
+          minWidth: 400,
           borderRadius: 4,
         }}
       >
@@ -147,3 +148,6 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
+
+
+
