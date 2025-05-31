@@ -75,7 +75,7 @@ function TopNavBar() {
   return (
     <>
       <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#2D3E50' }}>
-        <Toolbar sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+        <Toolbar sx={{ flexWrap: 'wrap', justifyContent: 'space-between' }}>
           {/* Center: Search + Filters (responsive) */}
           <Box
             sx={{
@@ -112,7 +112,7 @@ function TopNavBar() {
                 </Badge>
               ) : (
                 <Button
-                  variant={filterMode === 'apartment' ? 'contained' : 'outlined'}
+                  variant="contained"
                   color="primary"
                   startIcon={<FilterAltIcon />}
                   onClick={() => openDrawer('apartment')}
@@ -134,7 +134,7 @@ function TopNavBar() {
                 </Badge>
               ) : (
                 <Button
-                  variant={filterMode === 'transport' ? 'contained' : 'outlined'}
+                  variant="contained"
                   color="primary"
                   startIcon={<DirectionsBusIcon />}
                   onClick={() => openDrawer('transport')}
