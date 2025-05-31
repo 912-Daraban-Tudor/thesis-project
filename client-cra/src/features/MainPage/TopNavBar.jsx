@@ -75,17 +75,18 @@ function TopNavBar() {
   return (
     <>
       <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#2D3E50' }}>
-        <Toolbar sx={{ flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          {/* Center: Search + Filters (responsive) */}
+        <Toolbar sx={{ flexWrap: 'nowrap', justifyContent: 'space-between' }}>
+          {/* Left Section: Search + Filter Buttons */}
           <Box
             sx={{
               flexGrow: 1,
               display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
+              flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
               gap: 1.5,
-              flexWrap: 'wrap',
+              overflowX: 'auto',
+              whiteSpace: 'nowrap',
             }}
           >
             <SearchBoxInput />
@@ -95,8 +96,7 @@ function TopNavBar() {
                 display: 'flex',
                 flexDirection: 'row',
                 gap: 1,
-                flexWrap: 'wrap',
-                justifyContent: 'center',
+                alignItems: 'center',
               }}
             >
               {countApartmentFilters > 0 ? (
@@ -106,8 +106,9 @@ function TopNavBar() {
                     color="primary"
                     startIcon={<FilterAltIcon />}
                     onClick={() => openDrawer('apartment')}
+                    sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
                   >
-                    Apartment Filters
+                    <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Apartment Filters</Box>
                   </Button>
                 </Badge>
               ) : (
@@ -116,8 +117,9 @@ function TopNavBar() {
                   color="primary"
                   startIcon={<FilterAltIcon />}
                   onClick={() => openDrawer('apartment')}
+                  sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
                 >
-                  Apartment Filters
+                  <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Apartment Filters</Box>
                 </Button>
               )}
 
@@ -128,8 +130,9 @@ function TopNavBar() {
                     color="primary"
                     startIcon={<DirectionsBusIcon />}
                     onClick={() => openDrawer('transport')}
+                    sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
                   >
-                    Transport Filters
+                    <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Transport Filters</Box>
                   </Button>
                 </Badge>
               ) : (
@@ -138,15 +141,21 @@ function TopNavBar() {
                   color="primary"
                   startIcon={<DirectionsBusIcon />}
                   onClick={() => openDrawer('transport')}
+                  sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
                 >
-                  Transport Filters
+                  <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Transport Filters</Box>
                 </Button>
               )}
             </Box>
           </Box>
 
           {/* Profile icon */}
-          <IconButton size="large" color="inherit" onClick={handleProfileOpen} sx={{ ml: { xs: 0, md: 2 }, mt: { xs: 1, md: 0 } }}>
+          <IconButton
+            size="large"
+            color="inherit"
+            onClick={handleProfileOpen}
+            sx={{ ml: { xs: 0, md: 2 } }}
+          >
             <AccountCircle />
           </IconButton>
 
