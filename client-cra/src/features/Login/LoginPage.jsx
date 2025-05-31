@@ -60,7 +60,7 @@ function LoginPage() {
         sx={{
           p: 4,
           width: '100%',
-          minWidth: 400,
+          maxWidth: 400,
           borderRadius: 4,
         }}
       >
