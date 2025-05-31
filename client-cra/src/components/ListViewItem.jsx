@@ -1,5 +1,12 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Button } from '@mui/material';
+import {
+    Card,
+    CardContent,
+    Typography,
+    Box,
+    Button,
+    useTheme,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useMapContext } from '../context/MapContext';
@@ -8,8 +15,10 @@ import { jwtDecode } from 'jwt-decode';
 
 const ListViewItem = ({ location, isSelected, onClick }) => {
     const navigate = useNavigate();
-    const { searchCoords, isFallback } = useMapContext(); // ← also check fallback state
+    const { searchCoords, isFallback } = useMapContext();
     const { openChat } = useChatUI();
+    const theme = useTheme();
+
     const token = localStorage.getItem('token');
     const decodedToken = token ? jwtDecode(token) : null;
     const posterId = parseInt(location.created_by);
@@ -25,19 +34,22 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
     return (
         <Card
             onClick={onClick}
+            elevation={1}
             sx={{
                 mb: 2,
                 cursor: 'pointer',
-                backgroundColor: isSelected ? '#f0f0f0' : '#fff',
+                bgcolor: isSelected ? theme.palette.action.selected : theme.palette.background.paper,
                 transition: 'background-color 0.2s',
                 '&:hover': {
-                    backgroundColor: '#f9f9f9',
+                    bgcolor: theme.palette.action.hover,
                 },
             }}
         >
             <CardContent>
-                <Typography variant="h6">{location.name}</Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="h6" noWrap>
+                    {location.name}
+                </Typography>
+                <Typography variant="subtitle2" color="text.secondary" noWrap>
                     {location.address}
                 </Typography>
 
@@ -47,13 +59,13 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
                     </Typography>
                 )}
 
-                <Box mt={1}>
+                <Box mt={theme.spacing(1)}>
                     <Typography variant="body2">
                         Prices: {prices}
                     </Typography>
                 </Box>
 
-                <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                <Box mt={theme.spacing(2)} display="flex" justifyContent="flex-end" gap={1} flexWrap="wrap">
                     {isMe ? (
                         <Button
                             size="small"
@@ -65,7 +77,6 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
                                     state: { apartment: location, rooms: location.rooms || [] },
                                 });
                             }}
-                            sx={{ backgroundColor: '#795548', '&:hover': { backgroundColor: '#5d4037' } }}
                         >
                             Edit Post
                         </Button>
@@ -73,11 +84,11 @@ const ListViewItem = ({ location, isSelected, onClick }) => {
                         <Button
                             size="small"
                             variant="outlined"
+                            color="primary"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 openChat(location.created_by);
                             }}
-                            sx={{ borderColor: '#1976d2', color: '#1976d2', fontWeight: 500 }}
                         >
                             Send Message
                         </Button>

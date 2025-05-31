@@ -25,7 +25,6 @@ function AccountPage() {
   const loggedInUserId = tokenPayload?.id;
   const isMe = !id || String(id) === String(loggedInUserId);
 
-
   const [userData, setUserData] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
@@ -125,15 +124,16 @@ function AccountPage() {
       <ToastContainer />
       <Paper
         elevation={3}
-        style={{
-          padding: '2rem',
-          maxWidth: '400px',
+        sx={{
+          padding: 4,
+          maxWidth: 460,
           width: '100%',
-          backgroundColor: '#f7fbff',
+          bgcolor: '#fefaf1',
+          borderRadius: 4,
           textAlign: 'left',
-          boxSizing: 'border-box',
           overflowWrap: 'break-word',
           position: 'relative',
+          boxShadow: '0 0 20px rgba(0,0,0,0.05)',
         }}
       >
         <Box
@@ -176,7 +176,7 @@ function AccountPage() {
         <Avatar
           src={isMe && editMode ? formData.profilePictureUrl : userData.profile_picture_url}
           alt={userData.username}
-          sx={{ width: 100, height: 100, margin: '1rem auto' }}
+          sx={{ width: 100, height: 100, margin: '1rem auto', border: '4px solid #f5efe6' }}
         />
 
         {isMe && editMode ? (
@@ -189,7 +189,7 @@ function AccountPage() {
               fullWidth
               margin="normal"
               required
-              sx={{ backgroundColor: 'white' }}
+              sx={{ backgroundColor: 'white', borderRadius: 1 }}
             />
             <TextField
               label="Gender"
@@ -199,7 +199,7 @@ function AccountPage() {
               fullWidth
               margin="normal"
               select
-              sx={{ backgroundColor: 'white' }}
+              sx={{ backgroundColor: 'white', borderRadius: 1 }}
             >
               <MenuItem value="">Not specified</MenuItem>
               <MenuItem value="male">Male</MenuItem>
@@ -213,17 +213,16 @@ function AccountPage() {
               onChange={handleChange}
               fullWidth
               margin="normal"
-              sx={{ backgroundColor: 'white' }}
+              sx={{ backgroundColor: 'white', borderRadius: 1 }}
             />
 
-            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, backgroundColor: '#4a7ebb' }} fullWidth>
+            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, backgroundColor: '#4a7ebb', color: 'white' }}>
               Save Changes
             </Button>
             <Button
               variant="outlined"
-              color="secondary"
-              sx={{ mt: 1, borderColor: '#4a7ebb', color: '#4a7ebb' }}
               fullWidth
+              sx={{ mt: 1, borderColor: '#4a7ebb', color: '#4a7ebb' }}
               onClick={() => {
                 setFormData({
                   username: userData.username,
@@ -238,26 +237,25 @@ function AccountPage() {
             <Button
               variant="outlined"
               color="error"
-              sx={{ mt: 2, borderColor: '#d32f2f', color: '#d32f2f' }}
               fullWidth
+              sx={{ mt: 2, borderColor: '#d32f2f', color: '#d32f2f' }}
               onClick={() => setShowDeleteDialog(true)}
             >
               Delete Account
             </Button>
           </form>
         ) : (
-          <div>
-            <p><strong>Username:</strong> {userData.username}</p>
-            <p><strong>Gender:</strong> {userData.gender || 'Not specified'}</p>
-            {isMe && <p><strong>Email:</strong> {userData.email}</p>}
-            <p><strong>Joined:</strong> {formattedDate}</p>
+          <Box mt={2} mb={2}>
+            <Typography variant="body1" gutterBottom><strong>Username:</strong> {userData.username}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Gender:</strong> {userData.gender || 'Not specified'}</Typography>
+            {isMe && <Typography variant="body1" gutterBottom><strong>Email:</strong> {userData.email}</Typography>}
+            <Typography variant="body1" gutterBottom><strong>Joined:</strong> {formattedDate}</Typography>
             {isMe && (
               <>
                 <Button
                   variant="contained"
-                  color="primary"
-                  sx={{ mt: 2, backgroundColor: '#4a7ebb' }}
                   fullWidth
+                  sx={{ mt: 2, backgroundColor: '#4a7ebb', color: 'white' }}
                   onClick={() => setEditMode(true)}
                 >
                   Edit Account
@@ -265,21 +263,18 @@ function AccountPage() {
                 <Button
                   variant="outlined"
                   color="error"
-                  sx={{ mt: 1, borderColor: '#d32f2f', color: '#d32f2f' }}
                   fullWidth
+                  sx={{ mt: 1, borderColor: '#d32f2f', color: '#d32f2f' }}
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   Delete Account
                 </Button>
               </>
             )}
-          </div>
+          </Box>
         )}
 
-        <Dialog
-          open={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-        >
+        <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
           <DialogTitle>Confirm Account Deletion</DialogTitle>
           <DialogContent>
             <DialogContentText>
@@ -290,10 +285,7 @@ function AccountPage() {
             <Button onClick={() => setShowDeleteDialog(false)} sx={{ color: '#4a7ebb' }}>
               Cancel
             </Button>
-            <Button
-              onClick={handleDeleteAccount}
-              color="error"
-            >
+            <Button onClick={handleDeleteAccount} color="error">
               Delete
             </Button>
           </DialogActions>

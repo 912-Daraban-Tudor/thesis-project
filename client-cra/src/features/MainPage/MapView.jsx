@@ -5,7 +5,7 @@ import { useMapContext } from '../../context/MapContext';
 import LocationMarker from '../../components/LocationMarker';
 import MapLegend from '../../components/MapLegend';
 import { flyToWithOffset } from '../../utils/mapUtils';
-import { useMediaQuery, useTheme } from '@mui/material';
+import { useMediaQuery, useTheme, Box } from '@mui/material';
 
 const MapView = () => {
   const {
@@ -31,7 +31,14 @@ const MapView = () => {
   };
 
   return (
-    <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+    <Box
+      sx={{
+        height: '100vh',
+        width: '100vw',
+        position: 'relative',
+        bgcolor: 'background.default',
+      }}
+    >
       <ReactMapGL
         id="mainMap"
         {...viewState}
@@ -39,7 +46,7 @@ const MapView = () => {
         onMove={(evt) => setViewState(evt.viewState)}
         onClick={() => { setHighlightedLocation(null); setSelectedLocation(null) }}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/mapbox/streets-v11"
+        mapStyle="mapbox://styles/mapbox/light-v11"
         getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'grab')}
         style={{ width: '100%', height: '100%' }}
       >
@@ -55,7 +62,7 @@ const MapView = () => {
         ))}
       </ReactMapGL>
       <MapLegend />
-    </div>
+    </Box>
   );
 };
 

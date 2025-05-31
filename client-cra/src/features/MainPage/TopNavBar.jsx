@@ -56,7 +56,6 @@ function TopNavBar() {
 
   const closeDrawer = () => setFilterDrawerOpen(false);
 
-  // Compute badges
   const countApartmentFilters = [
     filters.price?.[0] > 0 || filters.price?.[1] < 2000,
     filters.floor?.[0] > 0 || filters.floor?.[1] < 10,
@@ -76,12 +75,42 @@ function TopNavBar() {
   return (
     <>
       <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#2D3E50' }}>
-        <Toolbar>
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
+        <Toolbar sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+          {/* Center: Search + Filters (responsive) */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1.5,
+              flexWrap: 'wrap',
+            }}
+          >
             <SearchBoxInput />
 
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Badge badgeContent={countApartmentFilters} color="secondary">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 1,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              }}
+            >
+              {countApartmentFilters > 0 ? (
+                <Badge badgeContent={countApartmentFilters} color="secondary">
+                  <Button
+                    variant={filterMode === 'apartment' ? 'contained' : 'outlined'}
+                    color="primary"
+                    startIcon={<FilterAltIcon />}
+                    onClick={() => openDrawer('apartment')}
+                  >
+                    Apartment Filters
+                  </Button>
+                </Badge>
+              ) : (
                 <Button
                   variant={filterMode === 'apartment' ? 'contained' : 'outlined'}
                   color="primary"
@@ -90,9 +119,20 @@ function TopNavBar() {
                 >
                   Apartment Filters
                 </Button>
-              </Badge>
+              )}
 
-              <Badge badgeContent={countTransportFilters} color="secondary">
+              {countTransportFilters > 0 ? (
+                <Badge badgeContent={countTransportFilters} color="secondary">
+                  <Button
+                    variant={filterMode === 'transport' ? 'contained' : 'outlined'}
+                    color="primary"
+                    startIcon={<DirectionsBusIcon />}
+                    onClick={() => openDrawer('transport')}
+                  >
+                    Transport Filters
+                  </Button>
+                </Badge>
+              ) : (
                 <Button
                   variant={filterMode === 'transport' ? 'contained' : 'outlined'}
                   color="primary"
@@ -101,11 +141,12 @@ function TopNavBar() {
                 >
                   Transport Filters
                 </Button>
-              </Badge>
+              )}
             </Box>
           </Box>
 
-          <IconButton size="large" color="inherit" onClick={handleProfileOpen}>
+          {/* Profile icon */}
+          <IconButton size="large" color="inherit" onClick={handleProfileOpen} sx={{ ml: { xs: 0, md: 2 }, mt: { xs: 1, md: 0 } }}>
             <AccountCircle />
           </IconButton>
 
@@ -117,6 +158,7 @@ function TopNavBar() {
         </Toolbar>
       </AppBar>
 
+      {/* Shared Drawer */}
       <Drawer
         anchor="right"
         open={filterDrawerOpen}

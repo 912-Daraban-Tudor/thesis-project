@@ -42,30 +42,31 @@ function MyPostsPage() {
     }
   };
 
-  if (loading) return <div>Loading your posts...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <Typography sx={{ mt: 5, textAlign: 'center' }}>Loading your posts...</Typography>;
+  if (error) return <Typography sx={{ mt: 5, textAlign: 'center', color: 'error.main' }}>{error}</Typography>;
 
   return (
-    <div
-      style={{
-        backgroundColor: '#fefaf1',
+    <Box
+      sx={{
+        backgroundColor: '#fff7ee',
         minHeight: '100vh',
         width: '100vw',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '1rem',
-        boxSizing: 'border-box',
+        p: 3,
       }}
     >
       <Paper
         elevation={3}
-        style={{
-          padding: '2rem',
+        sx={{
+          p: 3,
           maxWidth: '900px',
           width: '100%',
           backgroundColor: '#f7fbff',
+          borderRadius: 3,
+          boxShadow: 3,
           textAlign: 'left',
           position: 'relative',
         }}
@@ -85,14 +86,14 @@ function MyPostsPage() {
           Back
         </Button>
 
-        <Typography variant="h4" gutterBottom sx={{ color: '#4a7ebB', textAlign: 'center' }}>
+        <Typography variant="h4" gutterBottom sx={{ color: '#4a7ebb', textAlign: 'center' }}>
           My Posts
         </Typography>
 
         <Button
           variant="contained"
           color="primary"
-          sx={{ mb: 2, backgroundColor: '#4a7ebb' }}
+          sx={{ mb: 2, backgroundColor: '#4a7ebb', '&:hover': { backgroundColor: '#3a6ca8' } }}
           fullWidth
           onClick={() => navigate('/post')}
         >
@@ -108,14 +109,16 @@ function MyPostsPage() {
 
               return (
                 <React.Fragment key={location.id}>
-                  <Box sx={{
-                    p: 2,
-                    backgroundColor: '#fefaf1',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    '&:hover': { backgroundColor: '#f4f0e8' },
-                  }}
+                  <Box
+                    sx={{
+                      p: 2,
+                      backgroundColor: '#fffbe6',
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      position: 'relative',
+                      transition: '0.2s',
+                      '&:hover': { backgroundColor: '#f3ede2' },
+                    }}
                     onClick={() => navigate(`/edit-post/${location.id}`, { state: { apartment: location, rooms } })}
                   >
                     <Button
@@ -123,14 +126,13 @@ function MyPostsPage() {
                       size="medium"
                       sx={{
                         position: 'absolute',
-                        boxShadow: 'none',
                         top: 14,
                         right: 6,
                         color: '#4a7ebb',
                         backgroundColor: '#cfe6f5',
                         borderRadius: '6px',
                         textTransform: 'none',
-                        fontWeight: 500, //one step above normal
+                        fontWeight: 500,
                         '&:hover': { backgroundColor: '#b3d9f0', boxShadow: 'none' },
                       }}
                       onClick={(e) => {
@@ -146,15 +148,7 @@ function MyPostsPage() {
                     <Typography variant="body2" sx={{ color: '#555' }}>
                       Address: {location.address}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#555',
-                        mt: 1,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                      }}
-                    >
+                    <Typography variant="body2" sx={{ color: '#555', mt: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                       {location.description}
                     </Typography>
 
@@ -199,7 +193,7 @@ function MyPostsPage() {
           </List>
         )}
       </Paper>
-    </div>
+    </Box>
   );
 }
 

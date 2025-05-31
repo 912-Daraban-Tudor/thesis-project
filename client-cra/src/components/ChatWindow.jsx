@@ -181,7 +181,21 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                     <Box flexGrow={1} overflow="auto" px={1}>
                         <List dense>
                             {conversations.map((conv) => (
-                                <ListItemButton key={conv.id} onClick={() => handleSelectConversation(conv)}>
+                                <ListItemButton
+                                    key={conv.id}
+                                    onClick={() => handleSelectConversation(conv)}
+                                    sx={{
+                                        borderRadius: 2,
+                                        mb: 1,
+                                        px: 2,
+                                        '&:hover': {
+                                            backgroundColor: '#f0f0f0',
+                                        },
+                                        ...(activeConversation?.id === conv.id && {
+                                            backgroundColor: '#e0e0e0',
+                                        }),
+                                    }}
+                                >
                                     <ListItemText
                                         primary={getOtherUser(conv)}
                                         secondary={new Date(conv.last_message_at).toLocaleTimeString()}
@@ -207,7 +221,7 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                                 <Box
                                     key={msg.id}
                                     alignSelf={msg.sender_id === me ? 'flex-end' : 'flex-start'}
-                                    bgcolor={msg.sender_id === me ? '#d2e3c8' : '#ffffff'}
+                                    bgcolor={msg.sender_id === me ? '#e1f5fe' : '#fff'}
                                     color="black"
                                     borderRadius={2}
                                     px={2}
@@ -241,7 +255,16 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                                 if (e.key === 'Enter') handleSend();
                             }}
                         />
-                        <IconButton onClick={handleSend}>
+                        <IconButton
+                            onClick={handleSend}
+                            sx={{
+                                color: '#4a7ebb',
+                                ml: 1,
+                                '&:hover': {
+                                    backgroundColor: '#e0f0ff',
+                                },
+                            }}
+                        >
                             <SendIcon />
                         </IconButton>
                     </Box>

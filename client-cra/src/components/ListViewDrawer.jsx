@@ -1,4 +1,3 @@
-// src/components/ListViewDrawer.jsx
 import React, { useMemo } from 'react';
 import {
     Drawer,
@@ -8,6 +7,7 @@ import {
     useMediaQuery,
     Select,
     MenuItem,
+    Skeleton,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -29,9 +29,10 @@ const ListViewDrawer = () => {
         setSortBy,
         sortBy,
         setSortOrder,
+        sortOrder,
         listViewOpen,
         setListViewOpen,
-        sortOrder,
+        isLoading, // <- make sure this exists in context or pass as prop
     } = useMapContext();
 
     const { mainMap } = useMap();
@@ -56,8 +57,6 @@ const ListViewDrawer = () => {
             return 0;
         });
     }, [locations, sortBy, sortOrder]);
-
-
 
     const handleItemClick = (location) => {
         setSelectedLocation(null);
@@ -90,7 +89,20 @@ const ListViewDrawer = () => {
                     },
                 }}
             >
-                <Box display="flex" alignItems="center" justifyContent="space-between" p={2}>
+                {/* Sticky Header */}
+                <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    p={2}
+                    sx={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 1,
+                        backgroundColor: theme.palette.background.paper,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                    }}
+                >
                     <Typography variant="h6">Apartments</Typography>
                     <Box display="flex" gap={1} alignItems="center">
                         <Select
@@ -115,6 +127,7 @@ const ListViewDrawer = () => {
                     </Box>
                 </Box>
 
+                {/* Fallback Info */}
                 {searchCoords && isFallback && (
                     <Box px={2} pb={1}>
                         <Typography variant="body2" color="text.secondary">
@@ -123,6 +136,7 @@ const ListViewDrawer = () => {
                     </Box>
                 )}
 
+                {/* Main List */}
                 <Box
                     px={2}
                     pb={2}
@@ -143,22 +157,28 @@ const ListViewDrawer = () => {
                         '&::-webkit-scrollbar-track': {
                             backgroundColor: '#f2f2f2',
                         },
-                        scrollbarWidth: 'thin', // Firefox
-                        scrollbarColor: '#ccc #f2f2f2', // Firefox
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#ccc #f2f2f2',
                     }}
                 >
-                    {sortedLocations.map((loc) => (
-                        <ListViewItem
-                            key={loc.id}
-                            location={loc}
-                            isSelected={selectedLocation?.id === loc.id}
-                            onClick={() => handleItemClick(loc)}
-                        />
-                    ))}
+                    {isLoading
+                        ? [...Array(4)].map((_, i) => (
+                            <Box key={i} mb={2}>
+                                <Skeleton variant="rectangular" height={120} />
+                            </Box>
+                        ))
+                        : sortedLocations.map((loc) => (
+                            <ListViewItem
+                                key={loc.id}
+                                location={loc}
+                                isSelected={selectedLocation?.id === loc.id}
+                                onClick={() => handleItemClick(loc)}
+                            />
+                        ))}
                 </Box>
-
             </Drawer>
 
+            {/* Closed icon */}
             {!listViewOpen && (
                 <IconButton
                     onClick={toggleOpen}
