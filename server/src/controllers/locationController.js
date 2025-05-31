@@ -614,12 +614,12 @@ function buildSearchQueryWithoutCoordinates(params) {
         WHERE ST_DWithin(
           rl.geom::geography,
           ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
-          200
+          300
         )
         AND ST_DWithin(
           rl.geom::geography,
           l.geom::geography,
-          200
+          300
         )
       )
     `);

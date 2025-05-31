@@ -47,27 +47,21 @@ function PostRoomPage() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [rooms, setRooms] = useState([
     { price: '', description: '', balcony: false, sex_preference: '' }
   ]);
-
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
-
   const onDrop = (acceptedFiles) => {
     setSelectedFiles((prev) => [...prev, ...acceptedFiles]);
   };
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] } });
   const [notification, setNotification] = useState({
     open: false,
     message: '',
     severity: 'info',
   });
-
   const navigate = useNavigate();
-
   const handleApartmentChange = (e) => {
     const { name, value, type, checked } = e.target;
     setApartment((prev) => ({
@@ -219,12 +213,11 @@ function PostRoomPage() {
               type="text"
               error={!!formErrors.floor}
               helperText={formErrors.floor}
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              slotProps={{ input: { inputMode: 'numeric', pattern: '[0-9]*' }, inputLabel: { shrink: true } }}
               value={apartment.floor}
               onChange={handleApartmentChange}
               required
               sx={{ flex: 1, minWidth: '120px' }}
-              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="Number of Rooms"
@@ -232,24 +225,22 @@ function PostRoomPage() {
               type="text"
               error={!!formErrors.number_of_rooms}
               helperText={formErrors.number_of_rooms}
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              slotProps={{ input: { inputMode: 'numeric', pattern: '[0-9]*' }, inputLabel: { shrink: true } }}
               value={apartment.number_of_rooms}
               onChange={handleApartmentChange}
               required
               sx={{ flex: 1, minWidth: '120px' }}
-              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="Year Built"
               name="year_built"
               type="text"
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              slotProps={{ input: { inputMode: 'numeric', pattern: '[0-9]*' }, inputLabel: { shrink: true } }}
               value={apartment.year_built}
               onChange={handleApartmentChange}
               error={!!formErrors.year_built}
               helperText={formErrors.year_built}
               sx={{ flex: 1, minWidth: '120px' }}
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
@@ -347,14 +338,13 @@ function PostRoomPage() {
                   label="Price (€)"
                   name="price"
                   type="text"
-                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                  slotProps={{ input: { inputMode: 'numeric', pattern: '[0-9]*' }, inputLabel: { shrink: true } }}
                   value={room.price}
                   onChange={(e) => handleRoomChange(index, e)}
                   error={!!formErrors.rooms[index]?.price}
                   helperText={formErrors.rooms[index]?.price}
                   required
                   sx={{ flex: 1, minWidth: '120px' }}
-                  InputLabelProps={{ shrink: true }}
                 />
                 <FormControl error={!!formErrors.rooms[index]?.sex_preference} variant="outlined" sx={{ flex: 1, minWidth: '150px' }}>
                   <InputLabel id={`gender-preference-label-${index}`} htmlFor={`gender-preference-select-${index}`}>Gender preference</InputLabel>

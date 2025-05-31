@@ -1,6 +1,12 @@
-// src/components/SearchBoxInput.jsx
-import React, { useState } from 'react';
-import { InputBase, Button } from '@mui/material';
+import React, { useRef, useState } from 'react';
+import {
+    InputBase,
+    Button,
+    IconButton,
+    Paper,
+    useTheme,
+    InputAdornment,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { useMap } from 'react-map-gl';
@@ -9,7 +15,9 @@ import { useMapContext } from '../context/MapContext';
 const SearchBoxInput = () => {
     const [query, setQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const inputRef = useRef(null);
     const { setSearchCoords } = useMapContext();
+    const theme = useTheme();
 
     const { mainMap } = useMap();
     let map;
@@ -31,7 +39,6 @@ const SearchBoxInput = () => {
             const geocode = await fetch(geocodeUrl);
             if (!geocode.ok) throw new Error(`Geocoding failed: ${geocode.status}`);
             const data = await geocode.json();
-            console.log('🔍 Search results:', data);
 
             const feature = data.features?.[0];
             if (!feature) throw new Error('No results found for query.');
@@ -40,8 +47,10 @@ const SearchBoxInput = () => {
             setQuery(feature.place_name);
             setIsSearching(true);
             setSearchCoords({ lat, lng });
-
             map.flyTo({ center: [lng, lat], zoom: 14, essential: true });
+
+            // ✅ Blur input to close keyboard on mobile
+            inputRef.current?.blur();
         } catch (err) {
             console.error('❌ Search error:', err.message);
         }
@@ -50,38 +59,63 @@ const SearchBoxInput = () => {
     const handleClearSearch = () => {
         setQuery('');
         setIsSearching(false);
-        setSearchCoords(null); // 🧹 Clears proximity filtering
+        setSearchCoords(null);
+        inputRef.current?.focus();
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center' }}>
+        <Paper
+            component="form"
+            onSubmit={handleSubmit}
+            elevation={2}
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                borderRadius: theme.shape.borderRadius,
+                backgroundColor: theme.palette.background.paper,
+                px: 1,
+                height: 40,
+                width: { xs: '60%', sm: '300px' },
+            }}
+        >
             <InputBase
+                inputRef={inputRef}
                 placeholder="Search for address or area…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 sx={{
+                    flex: 1,
                     color: 'inherit',
-                    backgroundColor: '#555',
-                    px: 1,
-                    borderRadius: '4px 0 0 4px',
-                    height: '36px',
-                    width: { xs: '50%', sm: '300px' },
+                    pl: 1,
                 }}
+                endAdornment={
+                    query && (
+                        <InputAdornment position="end">
+                            <IconButton size="small" onClick={handleClearSearch}>
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </InputAdornment>
+                    )
+                }
             />
+
             <Button
                 onClick={isSearching ? handleClearSearch : handleSubmit}
                 type={isSearching ? 'button' : 'submit'}
                 sx={{
-                    backgroundColor: '#777',
-                    color: 'white',
-                    borderRadius: '0 4px 4px 0',
-                    height: '36px',
-                    minWidth: '40px',
+                    minWidth: 40,
+                    color: theme.palette.primary.contrastText,
+                    backgroundColor: theme.palette.primary.main,
+                    borderRadius: theme.shape.borderRadius,
+                    ml: 1,
+                    '&:hover': {
+                        backgroundColor: theme.palette.primary.dark,
+                    },
                 }}
             >
-                {isSearching ? <CloseIcon /> : <SearchIcon />}
+                <SearchIcon fontSize="small" />
             </Button>
-        </form>
+        </Paper>
     );
 };
 

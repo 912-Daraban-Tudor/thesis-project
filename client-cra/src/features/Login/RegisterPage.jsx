@@ -1,43 +1,49 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../api/axiosInstance";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+
     if (!email.includes("@")) {
       toast.error("Please enter a valid email address.", { position: "top-center", autoClose: 3000 });
       return;
     }
-    
+
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters long.", { position: "top-center", autoClose: 3000 });
       return;
-    }    
+    }
+
     try {
-      await axios.post("/api/auth/register", {
-        username,
-        email,
-        password,
-      });
+      await axios.post("/api/auth/register", { username, email, password });
 
       toast.success("Registration successful! You can now log in.", {
         position: "top-center",
         autoClose: 2000,
       });
-      
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000); // match the toast time so it feels natural
 
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       console.error("Registration failed", err);
       toast.error(err.response?.data?.message || "Registration failed. Please try again.", {
@@ -48,105 +54,96 @@ function RegisterPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Register</h1>
-        <form onSubmit={handleRegister} style={styles.form}>
-          <input
-            type="text"
-            placeholder="Username"
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      bgcolor="#f5f5f5"
+      px={2}
+    >
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          width: '100%',
+          maxWidth: 400,
+          borderRadius: 4,
+        }}
+      >
+        <Typography variant="h4" align="center" color="primary" mb={3}>
+          Create an Account
+        </Typography>
+
+        <form onSubmit={handleRegister}>
+          <TextField
+            label="Username"
+            variant="outlined"
+            fullWidth
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            style={styles.input}
             required
+            sx={{ mb: 2 }}
           />
-          <input
+
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
             type="email"
-            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
             required
+            sx={{ mb: 2 }}
           />
-          <input
-            type="password"
-            placeholder="Password"
+
+          <TextField
+            label="Password"
+            variant="outlined"
+            fullWidth
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
             required
+            sx={{ mb: 3 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
-          <button type="submit" style={styles.button}>
+
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            sx={{
+              backgroundColor: '#4a7ebb',
+              fontWeight: 'bold',
+              ':hover': {
+                backgroundColor: '#3b6ca8',
+              },
+            }}
+          >
             Register
-          </button>
+          </Button>
         </form>
-        <p style={styles.switchText}>
+
+        <Typography align="center" variant="body2" mt={3}>
           Already have an account?{" "}
-          <Link to="/login" style={styles.switchLink}>
+          <Link to="/login" style={{ color: "#4a7ebb", fontWeight: 500 }}>
             Log in
           </Link>
-        </p>
-      </div>
+        </Typography>
+      </Paper>
       <ToastContainer />
-    </div>
+    </Box>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    height: "100vh",
-    width: "100vw",
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    padding: "2rem",
-  },
-  card: {
-    padding: "2rem",
-    background: "#fff",
-    borderRadius: "1rem",
-    boxShadow: "0 0 20px rgba(0,0,0,0.1)",
-    textAlign: "center",
-    maxWidth: "400px",
-    width: "100%",
-  },
-  title: {
-    fontSize: "2rem",
-    marginBottom: "1.5rem",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  input: {
-    padding: "0.75rem 1rem",
-    fontSize: "1rem",
-    border: "1px solid #ddd",
-    borderRadius: "0.5rem",
-  },
-  button: {
-    padding: "0.75rem 1rem",
-    fontSize: "1rem",
-    backgroundColor: "#4CAF50",
-    color: "#fff",
-    border: "none",
-    borderRadius: "0.5rem",
-    cursor: "pointer",
-  },
-  switchText: {
-    marginTop: "1rem",
-    fontSize: "0.9rem",
-    color: "#666",
-  },
-  switchLink: {
-    color: "#4CAF50",
-    textDecoration: "underline",
-    cursor: "pointer",
-  },
-};
 
 export default RegisterPage;

@@ -22,7 +22,7 @@ const TransportFilters = () => {
 
     return (
         <Box display="flex" flexDirection="column" gap={2} px={2} pb={2}>
-            <Typography variant="h6">Transport Filters</Typography>
+            <Typography variant="body1">Proximity to Bus Line</Typography>
 
             <FormControl fullWidth>
                 <InputLabel id="bus-line-label">Near Bus Line</InputLabel>
