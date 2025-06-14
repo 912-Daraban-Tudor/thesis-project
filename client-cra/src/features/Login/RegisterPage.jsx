@@ -20,6 +20,7 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -35,21 +36,24 @@ function RegisterPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
       await axios.post("/api/auth/register", { username, email, password });
 
       toast.success("Registration successful! You can now log in.", {
         position: "top-center",
-        autoClose: 2000,
+        autoClose: 1000,
       });
 
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
       console.error("Registration failed", err);
       toast.error(err.response?.data?.message || "Registration failed. Please try again.", {
         position: "top-center",
         autoClose: 3000,
       });
+      setLoading(false);
     }
   };
 
@@ -107,14 +111,16 @@ function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             sx={{ mb: 3 }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword((prev) => !prev)} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
 
@@ -123,6 +129,7 @@ function RegisterPage() {
             variant="contained"
             fullWidth
             size="large"
+            disabled={loading}
             sx={{
               backgroundColor: '#4a7ebb',
               fontWeight: 'bold',

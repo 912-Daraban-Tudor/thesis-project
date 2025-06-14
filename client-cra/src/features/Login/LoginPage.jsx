@@ -19,6 +19,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -29,12 +30,15 @@ function LoginPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
       const response = await axios.post("/api/auth/login", { email, password });
       const { token } = response.data;
       localStorage.setItem("token", token);
 
       toast.success("Login successful! Redirecting...", { position: "top-center", autoClose: 1500 });
+
       setTimeout(() => navigate("/main"), 1500);
     } catch (err) {
       console.error("Login failed", err);
@@ -42,6 +46,7 @@ function LoginPage() {
         position: "top-center",
         autoClose: 3000,
       });
+      setLoading(false);
     }
   };
 
@@ -64,9 +69,23 @@ function LoginPage() {
           borderRadius: 4,
         }}
       >
-        <Typography variant="h4" align="center" color="primary" mb={3}>
-          Welcome Back
-        </Typography>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          mb={3}
+          gap={1.5}
+        >
+          <Box
+            component="img"
+            src="/iconLogo.png"
+            alt="Logo"
+            sx={{ height: 40, objectFit: 'contain' }}
+          />
+          <Typography variant="h4" color="primary" fontWeight={600}>
+            Welcome Back
+          </Typography>
+        </Box>
 
         <form onSubmit={handleLogin}>
           <TextField
@@ -107,6 +126,7 @@ function LoginPage() {
             variant="contained"
             fullWidth
             size="large"
+            disabled={loading}
             sx={{
               backgroundColor: '#4a7ebb',
               fontWeight: 'bold',

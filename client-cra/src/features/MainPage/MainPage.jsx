@@ -32,14 +32,14 @@ function MainPage() {
       navigate('/login');
     }
 
-    const hasSeenDialog = localStorage.getItem('seen_safety_dialog');
+    const hasSeenDialog = sessionStorage.getItem('seen_safety_dialog');
     if (!hasSeenDialog) {
       setSafetyDialogOpen(true);
     }
   }, [navigate]);
 
   const handleCloseDialog = () => {
-    localStorage.setItem('seen_safety_dialog', 'true');
+    sessionStorage.setItem('seen_safety_dialog', 'true');
     setSafetyDialogOpen(false);
   };
 

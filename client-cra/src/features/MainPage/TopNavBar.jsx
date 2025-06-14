@@ -89,6 +89,42 @@ function TopNavBar() {
               whiteSpace: 'nowrap',
             }}
           >
+
+            <Box
+              component="a"
+              href="/main"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                height: '100%',
+                px: 1,
+                textDecoration: 'none',
+              }}
+            >
+              <Box
+                component="img"
+                src="/iconTextLogo.png"
+                alt="Logo"
+                sx={{
+                  height: 32,
+                  display: { xs: 'none', sm: 'block' },
+                  objectFit: 'contain',
+                  verticalAlign: 'middle',
+                }}
+              />
+              <Box
+                component="img"
+                src="/iconLogo.png"
+                alt="Icon Logo"
+                sx={{
+                  height: 32,
+                  display: { xs: 'block', sm: 'none' },
+                  objectFit: 'contain',
+                  verticalAlign: 'middle',
+                }}
+              />
+            </Box>
+
             <SearchBoxInput />
 
             <Box
