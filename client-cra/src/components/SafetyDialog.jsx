@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 
 const tips = [
-    'Avoid fraud: always verify the user’s identity.',
+    "Avoid fraud: always verify the user's identity.",
     'Never send money without visiting the place.',
     'Always ask to see the rental contract.',
     'Beware of suspicious links.',
@@ -22,11 +22,11 @@ const tips = [
 const SafetyDialog = ({ open, onClose }) => {
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>⚠️ Stay Safe When Using the Platform</DialogTitle>
+            <DialogTitle>Stay Safe When Using the Platform</DialogTitle>
             <DialogContent dividers>
                 <List dense>
-                    {tips.map((tip, index) => (
-                        <ListItem key={index}>
+                    {tips.map((tip) => (
+                        <ListItem key={tip}>
                             <ListItemText primary={tip} />
                         </ListItem>
                     ))}

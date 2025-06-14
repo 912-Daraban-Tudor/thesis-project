@@ -1,4 +1,3 @@
-// client-cra/src/components/TransportFilters.jsx
 import React, { useEffect, useState } from 'react';
 import {
     Box,
@@ -7,6 +6,7 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    Button
 } from '@mui/material';
 import axios from '../api/axiosInstance';
 import UniversitySearchInput from './SearchUniversity';
@@ -19,6 +19,14 @@ const TransportFilters = () => {
     useEffect(() => {
         axios.get('/api/transport/lines').then((res) => setBusLines(res.data || []));
     }, []);
+
+    const handleClearTransportFilters = () => {
+        setFilters((prev) => ({
+            ...prev,
+            bus_line: null,
+            connected_to_university: null,
+        }));
+    };
 
     return (
         <Box display="flex" flexDirection="column" gap={2} px={2} pb={2}>
@@ -49,6 +57,12 @@ const TransportFilters = () => {
             </FormControl>
 
             <UniversitySearchInput />
+
+            <Box display="flex" justifyContent="center" mt={2}>
+                <Button variant="outlined" color="secondary" onClick={handleClearTransportFilters}>
+                    Clear Filters
+                </Button>
+            </Box>
         </Box>
     );
 };

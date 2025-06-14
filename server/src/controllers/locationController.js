@@ -490,17 +490,24 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     }
 
     if (!isNaN(universityLat) && !isNaN(universityLng)) {
-      conditions.push(`
-        EXISTS (
-          SELECT 1 FROM rutelinii rl
-          JOIN statii s ON rl.ruta = s.ruta
-          WHERE ST_DWithin(s.geom, ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326), 200)
-          AND ST_DWithin(rl.geom::geography, l.geom::geography, 300)
+    conditions.push(`
+      EXISTS (
+        SELECT 1 FROM rutelinii rl
+        WHERE ST_DWithin(
+          rl.geom::geography,
+          ST_SetSRID(ST_MakePoint($${paramIndex}, $${paramIndex + 1}), 4326)::geography,
+          300
         )
-      `);
-      values.push(universityLng, universityLat);
-      paramIndex += 2;
-    }
+        AND ST_DWithin(
+          rl.geom::geography,
+          l.geom::geography,
+          300
+        )
+      )
+    `);
+    values.push(universityLng, universityLat);
+    paramIndex += 2;
+  }
   }
 
   if (conditions.length) {
@@ -656,7 +663,7 @@ export const searchFilteredLocations = async (req, res) => {
     }
 
   } catch (err) {
-    console.error('❌ Error in searchFilteredLocations:', err);
+    console.error('Error in searchFilteredLocations:', err);
     res.status(500).json({ message: 'Server error during location search.' });
   }
 };
