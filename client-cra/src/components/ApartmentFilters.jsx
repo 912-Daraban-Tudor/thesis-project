@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Box,
     Typography,
@@ -96,7 +95,7 @@ const ApartmentFilters = () => {
                             }
                         />
                     }
-                    label="Has Heating (Centrala)"
+                    label="Has Heating"
                 />
             </FormGroup>
 
@@ -119,7 +118,7 @@ const ApartmentFilters = () => {
             </FormControl>
 
             <FormControl component="fieldset">
-                <FormLabel>Total Rooms</FormLabel>
+                <FormLabel>Total Rooms in Apartment</FormLabel>
                 <FormGroup row>
                     {[1, 2, 3, 4, 5].map(n => (
                         <FormControlLabel

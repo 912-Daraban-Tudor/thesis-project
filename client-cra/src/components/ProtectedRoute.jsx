@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -12,7 +11,6 @@ function ProtectedRoute({ children }) {
 
   try {
     const decoded = jwtDecode(token);
-    console.log('Decoded token:', decoded);
     const currentTime = Date.now() / 1000;
 
     if (decoded.exp < currentTime) {

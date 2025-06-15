@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -9,7 +9,7 @@ import {
     Button
 } from '@mui/material';
 import axios from '../api/axiosInstance';
-import UniversitySearchInput from './SearchUniversity';
+import SearchUniversity from './SearchUniversity';
 import { useMapContext } from '../context/MapContext';
 
 const TransportFilters = () => {
@@ -56,7 +56,7 @@ const TransportFilters = () => {
                 </Select>
             </FormControl>
 
-            <UniversitySearchInput />
+            <SearchUniversity />
 
             <Box display="flex" justifyContent="center" mt={2}>
                 <Button variant="outlined" color="secondary" onClick={handleClearTransportFilters}>

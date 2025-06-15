@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from './TopNavBar';
 import MapView from './MapView';
@@ -61,7 +61,6 @@ function MainPage() {
           <ListViewDrawer />
           <MapView />
 
-          {/* Chat FAB */}
           <Tooltip title="Chats">
             <Fab
               color="default"
@@ -83,7 +82,6 @@ function MainPage() {
             </Fab>
           </Tooltip>
 
-          {/* Post Room Button */}
           <Tooltip title="Post a Room">
             <Button
               variant="contained"

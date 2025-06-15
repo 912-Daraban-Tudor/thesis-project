@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     InputBase,
     Button,
@@ -24,7 +24,7 @@ const SearchBoxInput = () => {
     try {
         map = mainMap?.getMap();
     } catch (e) {
-        console.warn('⚠️ Failed to get map instance:', e);
+        console.warn('Failed to get map instance:', e);
         map = null;
     }
 
@@ -49,10 +49,9 @@ const SearchBoxInput = () => {
             setSearchCoords({ lat, lng });
             map.flyTo({ center: [lng, lat], zoom: 14, essential: true });
 
-            // ✅ Blur input to close keyboard on mobile
             inputRef.current?.blur();
         } catch (err) {
-            console.error('❌ Search error:', err.message);
+            console.error('Search error:', err.message);
         }
     };
 

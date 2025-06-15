@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
     Box,
     IconButton,
@@ -71,9 +71,9 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
             if (existing) {
                 handleSelectConversation(existing);
             } else {
-                await sendMessage({ recipientId: recipient.id, content: '👋' });
+                await sendMessage({ recipientId: recipient.id, content: 'Hello' });
                 await loadConversations();
-                const updated = await axios.get('/api/chats/conversations'); // force fresh
+                const updated = await axios.get('/api/chats/conversations');
                 const newConv = updated.data.find(
                     (c) =>
                         (c.user1_id === recipient.id && c.user2_id === me) ||
@@ -135,7 +135,6 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                 overflow: 'hidden',
             }}
         >
-            {/* HEADER */}
             <Box
                 p={1.5}
                 bgcolor="#f5efe6"
@@ -162,7 +161,6 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                 </IconButton>
             </Box>
 
-            {/* BODY */}
             {view === 'list' ? (
                 <Box display="flex" flexDirection="column" flexGrow={1} height="100%">
                     <Box p={1} borderBottom="1px solid #ddd">
@@ -207,7 +205,6 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                 </Box>
             ) : (
                 <Box display="flex" flexDirection="column" flexGrow={1} height="100%">
-                    {/* Scrollable message area */}
                     <Box
                         flexGrow={1}
                         overflow="auto"
@@ -241,7 +238,6 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
                         </Box>
                     </Box>
 
-                    {/* Input bar */}
                     <Divider />
                     <Box p={1.5} display="flex" bgcolor="#fff" borderTop="1px solid #ccc">
                         <TextField
@@ -274,7 +270,6 @@ const ChatWindow = ({ open, onClose, autoStartUserId = null }) => {
     );
 };
 
-// ✅ Helper: Only allow Google Maps links (including maps.app.goo.gl)
 const renderMessageContent = (text) => {
     if (typeof text !== 'string') return null;
 
@@ -282,6 +277,8 @@ const renderMessageContent = (text) => {
 
     return text.split(urlRegex).map((part, i) => {
         if (!part) return null;
+
+        const key = `${part}-${i}`;
 
         const isUrl = urlRegex.test(part);
         const normalized = part.startsWith('http') ? part : 'https://' + part;
@@ -295,7 +292,7 @@ const renderMessageContent = (text) => {
         if (isUrl) {
             return isAllowedMapLink ? (
                 <a
-                    key={i}
+                    key={key}
                     href={normalized}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -304,11 +301,11 @@ const renderMessageContent = (text) => {
                     {part}
                 </a>
             ) : (
-                <i key={i} style={{ color: 'red' }}>[Link not allowed]</i>
+                <i key={key} style={{ color: 'red' }}>[Link not allowed]</i>
             );
         }
 
-        return <span key={i}>{part}</span>;
+        return <span key={key}>{part}</span>;
     });
 };
 

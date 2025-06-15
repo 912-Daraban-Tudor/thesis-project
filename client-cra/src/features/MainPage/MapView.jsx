@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactMapGL, { AttributionControl, useMap } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapContext } from '../../context/MapContext';

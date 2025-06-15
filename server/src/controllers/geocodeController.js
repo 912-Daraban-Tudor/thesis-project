@@ -7,7 +7,6 @@ export const geocodeSearch = async (req, res) => {
         const apiKey = process.env.GOOGLE_API_KEY;
         const searchQuery = `${query}, Cluj-Napoca`;
 
-        // Step 1: Get coordinates from Google
         const geoResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
             params: { address: searchQuery, key: apiKey },
         });
@@ -23,7 +22,6 @@ export const geocodeSearch = async (req, res) => {
         const { formatted_address, geometry } = result;
         const { lat, lng } = geometry.location;
 
-        // Step 2: Find bus lines near this point (within 200m)
         const busQuery = await pool.query(`
       SELECT DISTINCT linia
       FROM rutelinii
@@ -36,7 +34,6 @@ export const geocodeSearch = async (req, res) => {
 
         const connectedLines = busQuery.rows.map(row => row.linia);
 
-        // Step 3: Send everything back to frontend
         res.json({
             formatted_address,
             location: { lat, lng },
@@ -44,7 +41,7 @@ export const geocodeSearch = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('❌ Geocoding error:', err);
+        console.error('Geocoding error:', err);
         res.status(500).json({ error: 'Failed to fetch location or lines' });
     }
 };

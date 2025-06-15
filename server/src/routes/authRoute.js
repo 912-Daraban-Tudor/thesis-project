@@ -3,18 +3,24 @@ import { registerUser, loginUser, getUserInfo, updateUserInfo, getPublicUserInfo
 import { verifyToken } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
-// POST /api/auth/register
+//POST
 router.post('/register', registerUser);
-// POST /api/auth/login
 router.post('/login', loginUser);
-// GET /api/auth/me (protected route)
 
+//GET
 router.get('/me', verifyToken, getUserInfo);
-router.get('/:id', verifyToken, getPublicUserInfo); // For getting user info by ID
-router.put('/me', verifyToken, updateUserInfo);
+router.get('/:id', verifyToken, getPublicUserInfo);
 router.get('/user-by-id/:id', getUserById);
 router.get('/user-by-username/:username', getUserByUsername);
+router.get('/protected', verifyToken, (req, res) => {
+  res.json({ message: `Hello ${req.user.username}, you accessed a protected route!` });
+});
 
+//PUT
+router.put('/me', verifyToken, updateUserInfo);
+
+
+//DELETE
 router.delete('/me', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -27,10 +33,6 @@ router.delete('/me', verifyToken, async (req, res) => {
 });
 
 
-
-router.get('/protected', verifyToken, (req, res) => {
-  res.json({ message: `Hello ${req.user.username}, you accessed a protected route!` });
-});
 
 export default router;
 

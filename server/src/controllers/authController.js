@@ -88,7 +88,7 @@ export const loginUser = async (req, res) => {
 
 export const getUserInfo = async (req, res) => {
   try {
-    const userId = req.user.id; // Get user ID from the token
+    const userId = req.user.id;
 
     const userResult = await pool.query(
       'SELECT id, username, email, created_at, gender, profile_picture_url FROM users WHERE id = $1',
@@ -147,7 +147,6 @@ export const updateUserInfo = async (req, res) => {
       return res.status(400).json({ message: "Invalid gender value." });
     }
 
-    // Check if username is taken by another user
     const existingUser = await pool.query(
       'SELECT id FROM users WHERE username = $1 AND id <> $2',
       [username, userId]
@@ -156,7 +155,7 @@ export const updateUserInfo = async (req, res) => {
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ message: "Username already in use by another account." });
     }
-    // Update user info
+
     await pool.query(
       'UPDATE users SET username = $1, gender = $2, profile_picture_url = $3 WHERE id = $4',
       [username, gender || null, profilePictureUrl, userId]

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MapProvider as MapboxProvider } from 'react-map-gl';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ChatWindow from './components/ChatWindow';
 import { ChatUIContext } from './context/ChatUIContext';
 import LoginPage from './features/Login/LoginPage';
@@ -15,6 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { ChatProvider } from './context/ChatContext';
 import 'yet-another-react-lightbox/styles.css';
 
+
 function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatUserId, setChatUserId] = useState(null);
@@ -24,11 +25,19 @@ function App() {
     setChatOpen(true);
   };
 
+  const chatUIContextValue = useMemo(
+    () => ({
+      openChat,
+      closeChat: () => setChatOpen(false),
+    }),
+    [openChat]
+  );
+
   return (
     <Router>
       <MapboxProvider>
         <ChatProvider>
-          <ChatUIContext.Provider value={{ openChat, closeChat: () => setChatOpen(false) }}>
+          <ChatUIContext.Provider value={chatUIContextValue}>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />

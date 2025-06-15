@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
 import {
@@ -127,7 +127,6 @@ function EditPostPage() {
             return;
         }
 
-        // Ensure newly selected images are uploaded first
         if (newFiles.length > 0 && newUploadedUrls.length === 0) {
             setNotification({ open: true, message: 'Please upload the selected images first.', severity: 'warning' });
             return;
@@ -180,7 +179,7 @@ function EditPostPage() {
                         error={!!formErrors.name}
                         helperText={formErrors.name}
                         sx={{ mb: 2 }}
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                     />
 
                     <AddressInput
@@ -202,12 +201,12 @@ function EditPostPage() {
                     )}
 
                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-                        <TextField label="Floor" name="floor" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.floor} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.floor} helperText={formErrors.floor} InputLabelProps={{ shrink: true }} />
-                        <TextField label="Number of Rooms" name="number_of_rooms" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.number_of_rooms} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.number_of_rooms} helperText={formErrors.number_of_rooms} InputLabelProps={{ shrink: true }} />
-                        <TextField label="Year Built" name="year_built" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.year_built} onChange={handleApartmentChange} sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.year_built} helperText={formErrors.year_built} InputLabelProps={{ shrink: true }} />
+                        <TextField label="Floor" name="floor" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.floor} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.floor} helperText={formErrors.floor} slotProps={{ inputLabel: { shrink: true } }} />
+                        <TextField label="Number of Rooms" name="number_of_rooms" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.number_of_rooms} onChange={handleApartmentChange} required sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.number_of_rooms} helperText={formErrors.number_of_rooms} slotProps={{ inputLabel: { shrink: true } }} />
+                        <TextField label="Year Built" name="year_built" type="text" inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} value={apartment.year_built} onChange={handleApartmentChange} sx={{ flex: 1, minWidth: '120px' }} error={!!formErrors.year_built} helperText={formErrors.year_built} slotProps={{ inputLabel: { shrink: true } }} />
                     </Box>
 
-                    <TextField label="Description" name="description" value={apartment.description} onChange={handleApartmentChange} multiline rows={3} fullWidth sx={{ mb: 2 }} InputLabelProps={{ shrink: true }} />
+                    <TextField label="Description" name="description" value={apartment.description} onChange={handleApartmentChange} multiline rows={3} fullWidth sx={{ mb: 2 }} slotProps={{ inputLabel: { shrink: true } }} />
 
                     <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
                         <FormControlLabel
@@ -226,7 +225,7 @@ function EditPostPage() {
 
                     <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
                         {existingImageUrls.map((url, idx) => (
-                            <Box key={idx} sx={{ position: 'relative' }}>
+                            <Box key={url} sx={{ position: 'relative' }}>
                                 <img src={url} alt={`existing-${idx}`} style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8 }} />
                                 <IconButton
                                     size="small"
@@ -248,7 +247,7 @@ function EditPostPage() {
                             backgroundColor: isDragActive ? '#e3f2fd' : '#fafafa',
                             cursor: 'pointer',
                             mb: 2,
-                            color: '#4a7ebb' // 💡 makes text visible
+                            color: '#4a7ebb'
                         }}
                     >
                         <input {...getInputProps()} />
@@ -335,7 +334,7 @@ function EditPostPage() {
                     </Button>
                 </form>
 
-                <Snackbar open={notification.open} autoHideDuration={6000} onClose={handleCloseNotification} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                <Snackbar open={notification.open} autoHideDuration={2000} onClose={handleCloseNotification} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
                     <Alert onClose={handleCloseNotification} severity={notification.severity} variant="filled">
                         {notification.message}
                     </Alert>

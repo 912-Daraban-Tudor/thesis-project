@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useState,
@@ -22,19 +22,16 @@ export const ChatProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const me = token ? jwtDecode(token).id : null;
 
-    // 🔁 Load all conversations
     const loadConversations = useCallback(async () => {
         const res = await axios.get('/api/chats/conversations');
         setConversations(res.data);
     }, []);
 
-    // 💬 Load messages for a specific conversation
     const loadMessages = useCallback(async (conversationId) => {
         const res = await axios.get(`/api/chats/conversations/${conversationId}/messages`);
         setMessages(res.data);
     }, []);
 
-    // 📤 Send message logic
     const sendMessage = useCallback(
         async ({ recipientId, content }) => {
             const tempMessage = {
@@ -61,7 +58,7 @@ export const ChatProvider = ({ children }) => {
                     msg,
                 ]);
 
-                socket.emit('new_message', msg); // 📡 notify the server
+                socket.emit('new_message', msg);
             } catch (err) {
                 console.error('Failed to send message:', err);
             }
@@ -69,7 +66,6 @@ export const ChatProvider = ({ children }) => {
         [activeConversation, me]
     );
 
-    // 🔌 Socket connection and listener (attached only once)
     useEffect(() => {
         if (!token) return;
 
@@ -77,12 +73,9 @@ export const ChatProvider = ({ children }) => {
         socket.connect();
 
         const handleNewMessage = async (message) => {
-            console.log('📥 Received message via socket:', message);
-
             await loadConversations();
 
             setMessages((prev) => {
-                // Append only if message is for the open conversation
                 if (message.conversation_id === activeConversation?.id) {
                     return [...prev, message];
                 }
@@ -100,7 +93,6 @@ export const ChatProvider = ({ children }) => {
         };
     }, [token, activeConversation?.id, loadConversations]);
 
-    // ✅ Memoized context value
     const contextValue = useMemo(
         () => ({
             conversations,
