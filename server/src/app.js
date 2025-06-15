@@ -26,6 +26,7 @@ app.use(compression());
 
 const allowedOrigins = [
   'http://localhost:3000',
+  'https://awesome-room-finder.up.railway.app',
   'https://thesis-project-five.vercel.app'
 ];
 app.use(cors({
