@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -28,7 +28,7 @@ function TopNavBar() {
 
   const [anchorElProfile, setAnchorElProfile] = useState(null);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const [filterMode, setFilterMode] = useState('apartment');
+  const [filterMode, setFilterMode] = useState('');
 
   const handleProfileOpen = (event) => setAnchorElProfile(event.currentTarget);
   const handleProfileClose = () => setAnchorElProfile(null);
@@ -45,6 +45,8 @@ function TopNavBar() {
 
   const handleLogoutClick = () => {
     localStorage.removeItem('token');
+    sessionStorage.clear();
+    localStorage.clear();
     handleProfileClose();
     navigate('/login');
   };
@@ -76,7 +78,6 @@ function TopNavBar() {
     <>
       <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#2D3E50' }}>
         <Toolbar sx={{ flexWrap: 'nowrap', justifyContent: 'space-between' }}>
-          {/* Left Section: Search + Filter Buttons */}
           <Box
             sx={{
               flexGrow: 1,
@@ -185,7 +186,6 @@ function TopNavBar() {
             </Box>
           </Box>
 
-          {/* Profile icon */}
           <IconButton
             size="large"
             color="inherit"
@@ -203,7 +203,6 @@ function TopNavBar() {
         </Toolbar>
       </AppBar>
 
-      {/* Shared Drawer */}
       <Drawer
         anchor="right"
         open={filterDrawerOpen}

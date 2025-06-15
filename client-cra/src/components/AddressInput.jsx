@@ -6,7 +6,6 @@ import SearchIcon from '@mui/icons-material/Search';
 function AddressInput({ value, onAddressSelect }) {
     const [query, setQuery] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
-
     const hasAddress = Boolean(value);
 
     const handleBlur = () => {
@@ -92,12 +91,14 @@ function AddressInput({ value, onAddressSelect }) {
                                 variant="outlined"
                                 value={value}
                                 fullWidth
-                                InputProps={{
-                                    readOnly: true,
-                                    style: {
-                                        color: 'black',
-                                        whiteSpace: 'normal',
-                                        wordBreak: 'break-word',
+                                slotProps={{
+                                    input: {
+                                        readOnly: true,
+                                        style: {
+                                            color: 'black',
+                                            whiteSpace: 'normal',
+                                            wordBreak: 'break-word',
+                                        },
                                     },
                                 }}
                                 sx={{ backgroundColor: '#f9f9f9' }}

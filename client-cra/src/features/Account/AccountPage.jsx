@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
 import {
@@ -21,7 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 function AccountPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const tokenPayload = JSON.parse(atob(localStorage.getItem('token')?.split('.')[1] || '{}'));
+  const tokenPayload = JSON.parse(atob(sessionStorage.getItem('token')?.split('.')[1] || '{}'));
   const loggedInUserId = tokenPayload?.id;
   const isMe = !id || String(id) === String(loggedInUserId);
 

@@ -1,5 +1,4 @@
-// src/pages/ApartmentPage.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from '../../api/axiosInstance';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -163,7 +162,7 @@ function ApartmentPage() {
             cursor: 'pointer',
           }}
         >
-          {images.slice(0, 4).map((url, index) => (
+          {images.slice(0, images.length).map((url, index) => (
             <Box
               key={index}
               component="img"

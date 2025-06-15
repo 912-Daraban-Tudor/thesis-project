@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Box, Typography, Slider, FormControlLabel, Switch,
     Checkbox, FormGroup, FormControl, FormLabel, Button,
@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import axios from '../api/axiosInstance';
 import { useMapContext } from '../context/MapContext';
-import UniversitySearchInput from './SearchUniversity';
+import SearchUniversity from './SearchUniversity';
 
 const currentYear = new Date().getFullYear();
 const rangeText = ([min, max]) => `${min} - ${max}`;
@@ -92,7 +92,7 @@ const FilterPanel = () => {
 
             <FormGroup>
                 <FormControlLabel control={<Switch checked={hasParking} onChange={() => setHasParking(!hasParking)} />} label="Has Parking" />
-                <FormControlLabel control={<Switch checked={hasCentrala} onChange={() => setHasCentrala(!hasCentrala)} />} label="Has Heating (Centrala)" />
+                <FormControlLabel control={<Switch checked={hasCentrala} onChange={() => setHasCentrala(!hasCentrala)} />} label="Has Heating" />
             </FormGroup>
 
             <FormControl component="fieldset">
@@ -109,7 +109,7 @@ const FilterPanel = () => {
             </FormControl>
 
             <FormControl component="fieldset">
-                <FormLabel>Total Rooms</FormLabel>
+                <FormLabel>Total Rooms in the Apartment</FormLabel>
                 <FormGroup row>
                     {[1, 2, 3, 4, 5].map((n) => (
                         <FormControlLabel
@@ -162,7 +162,7 @@ const FilterPanel = () => {
                 </Select>
             </FormControl>
 
-            <UniversitySearchInput />
+            <SearchUniversity />
 
             <Button variant="contained" color="primary" onClick={handleApply}>
                 Apply Filters

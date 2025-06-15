@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../api/axiosInstance";
 import {
@@ -77,6 +77,7 @@ function LoginPage() {
           gap={1.5}
         >
           <Box
+            backgroundColor="#2d3e50"
             component="img"
             src="/iconLogo.png"
             alt="Logo"

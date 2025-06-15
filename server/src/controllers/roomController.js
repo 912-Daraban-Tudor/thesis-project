@@ -1,6 +1,5 @@
 import pool from '../models/db.js';
 
-// Add room
 export const addRoom = async (req, res) => {
   try {
     const { location_id, description, price, balcony, sex_preference } = req.body;
@@ -21,7 +20,6 @@ export const addRoom = async (req, res) => {
   }
 };
 
-// Get rooms (optionally filter by location or availability)
 export const getRooms = async (req, res) => {
   try {
     const { location_id } = req.query;
@@ -31,7 +29,7 @@ export const getRooms = async (req, res) => {
     if (location_id) {
       query += ' WHERE location_id = $1';
       params.push(location_id);
-    } 
+    }
 
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -41,7 +39,6 @@ export const getRooms = async (req, res) => {
   }
 };
 
-// Update room
 export const updateRoom = async (req, res) => {
   try {
     const { id } = req.params;
@@ -61,7 +58,6 @@ export const updateRoom = async (req, res) => {
   }
 };
 
-// Delete room
 export const deleteRoom = async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,4 +1,3 @@
-// server/src/controllers/chatController.js
 import pool from '../models/db.js';
 
 export const getUserConversations = async (req, res) => {
@@ -28,7 +27,6 @@ export const getMessagesInConversation = async (req, res) => {
     const { conversationId } = req.params;
 
     try {
-        // Ensure user is part of conversation
         const convCheck = await pool.query(`
       SELECT * FROM conversations
       WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)

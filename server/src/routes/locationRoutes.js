@@ -20,10 +20,10 @@ router.post('/with-rooms', verifyToken, addLocationWithRooms);
 
 //READ
 router.get('/', getLocations);
-router.get('/search', verifyToken, searchFilteredLocations); // ← keep this for search
+router.get('/search', verifyToken, searchFilteredLocations);
 router.get('/filter', verifyToken, filterLocationsNearby);
-router.get('/myrooms', verifyToken, getLocationsByUserIdJoined); // ← move up BEFORE /:id
-router.get('/:id', getLocationById); // ← keep this last!
+router.get('/myrooms', verifyToken, getLocationsByUserIdJoined);
+router.get('/:id', getLocationById);
 
 //UPDATE
 router.put('/:id', verifyToken, updateLocationById);

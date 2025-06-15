@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     TextField, IconButton, Box, Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import { useMapContext } from '../context/MapContext';
-import axios from '../api/axiosInstance'; // Adjust the import path as needed
-const UniversitySearchInput = () => {
+import axios from '../api/axiosInstance';
+const SearchUniversity = () => {
     const [connectedLines, setConnectedLines] = useState([]);
     const { setFilters } = useMapContext();
     const [query, setQuery] = useState('');
@@ -18,8 +18,6 @@ const UniversitySearchInput = () => {
         try {
             const res = await axios.get('/api/geocode', { params: { query } });
             const data = res.data;
-
-            console.log('Search results:', data);
 
             if (!data || !data.location || !data.formatted_address) {
                 alert('No results found.');
@@ -85,4 +83,4 @@ const UniversitySearchInput = () => {
     );
 };
 
-export default UniversitySearchInput;
+export default SearchUniversity;

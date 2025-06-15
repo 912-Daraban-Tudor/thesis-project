@@ -1,17 +1,26 @@
-// src/components/DropdownMenu.jsx
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function DropdownMenu({ items, style }) {
   return (
     <div style={{ ...defaultStyle, ...style }}>
-      {items.map((item, index) => (
-        <div
-          key={index}
-          style={itemStyle}
+      {items.map((item) => (
+        <button
+          key={item.key || (typeof item.label === 'string' ? item.label : Math.random())}
+          style={{ ...itemStyle, background: 'none', border: 'none', width: '100%', textAlign: 'left' }}
           onClick={item.onClick}
+          type="button"
+          role="menuitem"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (item.onClick) item.onClick(e);
+            }
+          }}
         >
           {item.label}
-        </div>
+        </button>
       ))}
     </div>
   );
@@ -33,6 +42,15 @@ const itemStyle = {
   padding: '0.75rem 1rem',
   cursor: 'pointer',
   borderBottom: '1px solid #eee',
+};
+DropdownMenu.propTypes = {
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.node.isRequired,
+      onClick: PropTypes.func
+    })
+  ).isRequired,
+  style: PropTypes.object
 };
 
 export default DropdownMenu;

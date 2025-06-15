@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "../../api/axiosInstance";
 import {
@@ -76,9 +76,24 @@ function RegisterPage() {
           borderRadius: 4,
         }}
       >
-        <Typography variant="h4" align="center" color="primary" mb={3}>
-          Create an Account
-        </Typography>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          mb={3}
+          gap={1.5}
+        >
+          <Box
+            backgroundColor="#2d3e50"
+            component="img"
+            src="/iconLogo.png"
+            alt="Logo"
+            sx={{ height: 40, objectFit: 'contain' }}
+          />
+          <Typography variant="h4" align="center" color="primary" mb={3}>
+            Create an Account
+          </Typography>
+        </Box>
 
         <form onSubmit={handleRegister}>
           <TextField

@@ -42,7 +42,7 @@ export const addLocationWithRooms = async (req, res) => {
       address,
       number_of_rooms,
       rooms,
-      images // array of URLs from Cloudinary
+      images,
     } = req.body;
 
     const userId = req.user.id;
@@ -64,7 +64,6 @@ export const addLocationWithRooms = async (req, res) => {
 
     const locationId = locationResult.rows[0].id;
 
-    // Insert rooms
     for (const room of rooms) {
       await pool.query(
         `INSERT INTO rooms (location_id, description, price, balcony, sex_preference)
@@ -73,7 +72,6 @@ export const addLocationWithRooms = async (req, res) => {
       );
     }
 
-    // Insert image URLs into location_images table
     for (const url of images || []) {
       await pool.query(
         `INSERT INTO location_images (location_id, image_url)
@@ -145,7 +143,6 @@ export const getLocationsByUserId = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Get all locations created by the user
     const locationsResult = await pool.query(
       'SELECT * FROM locations WHERE created_by = $1',
       [userId]
@@ -154,7 +151,6 @@ export const getLocationsByUserId = async (req, res) => {
     const locations = locationsResult.rows;
     const locationsWithRooms = [];
 
-    // For each location, fetch its rooms
     for (const location of locations) {
       const roomsResult = await pool.query(
         'SELECT * FROM rooms WHERE location_id = $1',
@@ -261,11 +257,10 @@ export const updateLocationById = async (req, res) => {
       floor,
       year_built,
       number_of_rooms,
-      rooms,       // array of { id, description, sex_preference, balcony, price }
-      images = [], // ✅ Cloudinary URLs (new + existing)
+      rooms,
+      images = [],
     } = req.body;
 
-    // 1. Update location
     await pool.query(
       `UPDATE locations
          SET name = $1, address = $2, description = $3, has_centrala = $4, has_parking = $5,
@@ -274,7 +269,6 @@ export const updateLocationById = async (req, res) => {
       [name, address, description, has_centrala, has_parking, floor, year_built, number_of_rooms, id]
     );
 
-    // 2. Update each room (assumes IDs exist)
     for (const room of rooms) {
       await pool.query(
         `UPDATE rooms
@@ -284,7 +278,6 @@ export const updateLocationById = async (req, res) => {
       );
     }
 
-    // 3. Replace images
     await pool.query(`DELETE FROM location_images WHERE location_id = $1`, [id]);
 
     for (const url of images) {
@@ -309,10 +302,8 @@ export const deleteLocationById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Delete rooms first (foreign key constraint)
     await pool.query(`DELETE FROM rooms WHERE location_id = $1`, [id]);
 
-    // Then delete location
     await pool.query(`DELETE FROM locations WHERE id = $1`, [id]);
 
     res.json({ message: 'Location and its rooms deleted successfully.' });
@@ -322,12 +313,11 @@ export const deleteLocationById = async (req, res) => {
   }
 };
 
-// locationController.js
 export const filterLocationsNearby = async (req, res) => {
   try {
     const lat = parseFloat(req.query.lat);
     const lng = parseFloat(req.query.lng);
-    const radiusMeters = parseFloat(req.query.radius) || 1000; // default to 1000 meters
+    const radiusMeters = parseFloat(req.query.radius) || 1000;
 
     if (isNaN(lat) || isNaN(lng)) {
       return res.status(400).json({ message: 'Latitude and longitude must be valid numbers.' });
@@ -346,7 +336,6 @@ export const filterLocationsNearby = async (req, res) => {
 
     const filtered = result.rows;
 
-    // fallback: return all if fewer than 5
     if (filtered.length >= 5) {
       return res.json(filtered);
     } else {
@@ -360,7 +349,6 @@ export const filterLocationsNearby = async (req, res) => {
   }
 };
 
-// Revised backend functions for full bus line filtering
 
 function parseSearchParams(query) {
   return {
@@ -490,7 +478,7 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     }
 
     if (!isNaN(universityLat) && !isNaN(universityLng)) {
-    conditions.push(`
+      conditions.push(`
       EXISTS (
         SELECT 1 FROM rutelinii rl
         WHERE ST_DWithin(
@@ -505,9 +493,9 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
         )
       )
     `);
-    values.push(universityLng, universityLat);
-    paramIndex += 2;
-  }
+      values.push(universityLng, universityLat);
+      paramIndex += 2;
+    }
   }
 
   if (conditions.length) {

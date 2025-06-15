@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from '../../api/axiosInstance';
 import {
   TextField,
@@ -249,11 +249,11 @@ function PostRoomPage() {
           <Box sx={{ display: 'flex', gap: 4, mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
               <Checkbox checked={apartment.has_centrala} onChange={handleApartmentChange} name="has_centrala" />
-              <Typography variant="body1" color='black'>Has heating</Typography>
+              <Typography variant="body1" color='black'>Heating</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0 }}>
               <Checkbox checked={apartment.has_parking} onChange={handleApartmentChange} name="has_parking" />
-              <Typography variant="body1" color='black'>Has parking</Typography>
+              <Typography variant="body1" color='black'>Parking</Typography>
             </Box>
           </Box>
 

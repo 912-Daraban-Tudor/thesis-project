@@ -1,33 +1,31 @@
-// server/src/app.js
 import express from 'express';
-import http from 'http'; // 🧠 for wrapping Express with socket.io
+import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initSocket } from './socket.js'; // ✅ Import socket.io logic
+import { initSocket } from './socket.js';
 import helmet from 'helmet';
 import compression from 'compression';
 
 import authRoutes from './routes/authRoute.js';
 import locationRoutes from './routes/locationRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
-import chatRoutes from './routes/chatRoutes.js'; // Optional: placeholder for chatRoutes
-import imageRoutes from './routes/imageRoutes.js'; // Optional: placeholder for imageRoutes
-import transportRoutes from './routes/transportRoutes.js'; // Optional: placeholder for transportRoutes
-import geocodeRoutes from './routes/geocodeRoutes.js'; // Optional: placeholder for geocodeRoutes
+import chatRoutes from './routes/chatRoutes.js';
+import imageRoutes from './routes/imageRoutes.js';
+import transportRoutes from './routes/transportRoutes.js';
+import geocodeRoutes from './routes/geocodeRoutes.js';
 
 
 dotenv.config();
 
 
 const app = express();
-const server = http.createServer(app); // 💡 Wrap app with HTTP server
+const server = http.createServer(app);
 
 app.use(helmet());
 app.use(compression());
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://awesome-room-finder.up.railway.app',
   'https://thesis-project-five.vercel.app'
 ];
 app.use(cors({
@@ -50,7 +48,7 @@ app.use('/api/images', imageRoutes);
 app.use('/api/transport', transportRoutes);
 app.use('/api/geocode', geocodeRoutes);
 app.use((err, req, res, next) => {
-  console.error('❌ Unexpected server error:', err.stack);
+  console.error('Unexpected server error:', err.stack);
   res.status(500).json({ error: 'Something went wrong on the server.' });
 });
 

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
     Drawer,
     IconButton,
@@ -32,7 +32,7 @@ const ListViewDrawer = () => {
         sortOrder,
         listViewOpen,
         setListViewOpen,
-        isLoading, // <- make sure this exists in context or pass as prop
+        isLoading,
     } = useMapContext();
 
     const { mainMap } = useMap();
@@ -89,7 +89,6 @@ const ListViewDrawer = () => {
                     },
                 }}
             >
-                {/* Sticky Header */}
                 <Box
                     display="flex"
                     alignItems="center"
@@ -127,7 +126,6 @@ const ListViewDrawer = () => {
                     </Box>
                 </Box>
 
-                {/* Fallback Info */}
                 {searchCoords && isFallback && (
                     <Box px={2} pb={1}>
                         <Typography variant="body2" color="text.secondary">
@@ -136,7 +134,6 @@ const ListViewDrawer = () => {
                     </Box>
                 )}
 
-                {/* Main List */}
                 <Box
                     px={2}
                     pb={2}
@@ -162,8 +159,8 @@ const ListViewDrawer = () => {
                     }}
                 >
                     {isLoading
-                        ? [...Array(4)].map((_, i) => (
-                            <Box key={i} mb={2}>
+                        ? [1, 2, 3, 4].map((val) => (
+                            <Box key={`skeleton-${val}`} mb={2}>
                                 <Skeleton variant="rectangular" height={120} />
                             </Box>
                         ))
@@ -178,7 +175,6 @@ const ListViewDrawer = () => {
                 </Box>
             </Drawer>
 
-            {/* Closed icon */}
             {!listViewOpen && (
                 <IconButton
                     onClick={toggleOpen}

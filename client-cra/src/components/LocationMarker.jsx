@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Marker, Popup } from 'react-map-gl';
 import { Avatar, Typography, Button, Chip, Box } from '@mui/material';
@@ -10,7 +9,7 @@ const LocationMarker = ({ location, selected, highlighted, onClick }) => {
     const navigate = useNavigate();
     const { setSelectedLocation } = useMapContext();
     const { openChat } = useChatUI();
-    const posterId = parseInt(location.created_by); // assuming `created_by` is part of the location object
+    const posterId = parseInt(location.created_by);
     const token = localStorage.getItem('token');
     const decodedToken = token ? jwtDecode(token) : null;
     const isMe = decodedToken?.id === posterId;

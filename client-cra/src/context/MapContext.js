@@ -23,8 +23,8 @@ export const MapProvider = ({ children }) => {
         has_centrala: false,
         room_count: [],
         number_of_rooms: [],
-        bus_line: null, // e.g. "25" or "M13"
-        connected_to_university: null, // { latitude, longitude } or null
+        bus_line: null,
+        connected_to_university: null,
         sex_preference: null,
     });
 
@@ -84,12 +84,11 @@ export const MapProvider = ({ children }) => {
         const fetchLocations = async () => {
             try {
                 const params = buildQueryParams();
-                console.log('🔍 Fetching locations with params:', params);
                 const response = await axios.get('/api/locations/search', { params });
                 setIsFallback(response.data.fallback);
                 setLocations(response.data.data || []);
             } catch (error) {
-                console.error('❌ Error fetching locations:', error.message);
+                console.error('Error fetching locations:', error.message);
             }
         };
 
