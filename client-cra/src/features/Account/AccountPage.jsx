@@ -21,7 +21,24 @@ import 'react-toastify/dist/ReactToastify.css';
 function AccountPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const tokenPayload = JSON.parse(atob(sessionStorage.getItem('token')?.split('.')[1] || '{}'));
+  let tokenPayload = {};
+  try {
+    const token =
+      sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found in sessionStorage or localStorage');
+    }
+
+    const base64Payload = token.split('.')[1];
+    if (!base64Payload) {
+      throw new Error('Invalid JWT: no payload segment');
+    }
+
+    tokenPayload = JSON.parse(atob(base64Payload));
+  } catch (err) {
+    console.error('Failed to decode token:', err);
+  }
+
   const loggedInUserId = tokenPayload?.id;
   const isMe = !id || String(id) === String(loggedInUserId);
 
