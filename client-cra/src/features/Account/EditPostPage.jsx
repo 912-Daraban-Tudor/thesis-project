@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from '../../api/axiosInstance';
 import {
-    TextField, CircularProgress, Checkbox, Button, Typography, Divider, Box, MenuItem,
-    FormControl, FormControlLabel, InputLabel, Select, IconButton, Snackbar, Alert
+    TextField, Checkbox, Button, Typography, Divider, Box, MenuItem,
+    FormControl, FormControlLabel, InputLabel, Select, IconButton, Snackbar, Alert, CircularProgress
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -37,7 +37,17 @@ function EditPostPage() {
         const fetchData = async () => {
             try {
                 const res = await axios.get(`/api/locations/${id}`);
-                setApartment(res.data.location);
+                const fetched = res.data.location;
+
+                if (fetched.latitude == null || fetched.longitude == null) {
+                    setNotification({
+                        open: true,
+                        message: 'Warning: location coordinates missing. Please re-select address.',
+                        severity: 'warning'
+                    });
+                }
+
+                setApartment(fetched);
                 setRooms(res.data.rooms || []);
                 setExistingImageUrls(res.data.images || []);
                 setLoading(false);
@@ -48,9 +58,7 @@ function EditPostPage() {
             }
         };
 
-        if (!state?.apartment) {
-            fetchData();
-        }
+        if (!state?.apartment) fetchData();
     }, [id, state]);
 
     const handleApartmentChange = (e) => {
@@ -106,9 +114,10 @@ function EditPostPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
+
         const errors = {
             name: !apartment.name ? 'Required' : '',
-            address: (!apartment.address || !apartment.latitude || !apartment.longitude) ? 'Please select a valid address' : '',
+            address: (!apartment.address || apartment.latitude == null || apartment.longitude == null) ? 'Please select a valid address' : '',
             floor: !apartment.floor ? 'Required' : '',
             number_of_rooms: !apartment.number_of_rooms ? 'Required' : '',
             year_built: apartment.year_built && isNaN(apartment.year_built) ? 'Must be a number' : '',
@@ -122,13 +131,16 @@ function EditPostPage() {
 
         const hasApartmentErrors = Object.values(errors).some((v) => typeof v === 'string' && v);
         const hasRoomErrors = errors.rooms.some((r) => Object.values(r).some(Boolean));
+
         if (hasApartmentErrors || hasRoomErrors) {
             setNotification({ open: true, message: 'Please fix validation errors', severity: 'error' });
+            setIsSubmitting(false);
             return;
         }
 
         if (newFiles.length > 0 && newUploadedUrls.length === 0) {
             setNotification({ open: true, message: 'Please upload the selected images first.', severity: 'warning' });
+            setIsSubmitting(false);
             return;
         }
 
@@ -144,7 +156,7 @@ function EditPostPage() {
             setNotification({ open: true, message: 'Apartment updated!', severity: 'success' });
             setTimeout(() => navigate('/main'), 1500);
         } catch (err) {
-            console.error('Update error:', err);
+            console.error('Update error:', err.response?.data || err.message);
             setNotification({ open: true, message: 'Failed to update. Try again.', severity: 'error' });
         } finally {
             setIsSubmitting(false);
@@ -158,7 +170,7 @@ function EditPostPage() {
     return (
         <div style={{ backgroundColor: '#fff7ee', minHeight: '100vh', width: '100vw', padding: '2rem', display: 'flex', justifyContent: 'center' }}>
             <Box sx={{ width: '100%', maxWidth: '900px', backgroundColor: '#f7fbff', p: 3, borderRadius: 2, boxShadow: 3 }}>
-                <Button variant="outlined" color="secondary" sx={{ position: 'relative', top: '0.5rem', left: '0.5rem', borderColor: '#4a7ebb', color: '#4a7ebb' }} onClick={() => navigate(-1)}>
+                <Button variant="outlined" color="secondary" sx={{ mb: 2, borderColor: '#4a7ebb', color: '#4a7ebb' }} onClick={() => navigate(-1)}>
                     Back
                 </Button>
 
@@ -334,7 +346,7 @@ function EditPostPage() {
                     </Button>
                 </form>
 
-                <Snackbar open={notification.open} autoHideDuration={2000} onClose={handleCloseNotification} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                <Snackbar open={notification.open} autoHideDuration={3000} onClose={handleCloseNotification} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
                     <Alert onClose={handleCloseNotification} severity={notification.severity} variant="filled">
                         {notification.message}
                     </Alert>
@@ -345,3 +357,7 @@ function EditPostPage() {
 }
 
 export default EditPostPage;
+
+
+
+
