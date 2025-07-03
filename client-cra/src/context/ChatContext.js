@@ -5,6 +5,7 @@ import {
     useEffect,
     useMemo,
     useCallback,
+    useRef,
 } from 'react';
 import socket from '../api/socket';
 import axios from '../api/axiosInstance';
@@ -21,6 +22,12 @@ export const ChatProvider = ({ children }) => {
 
     const token = localStorage.getItem('token');
     const me = token ? jwtDecode(token).id : null;
+
+    const activeConvIdRef = useRef(activeConversation?.id);
+
+    useEffect(() => {
+        activeConvIdRef.current = activeConversation?.id;
+    }, [activeConversation?.id]);
 
     const loadConversations = useCallback(async () => {
         const res = await axios.get('/api/chats/conversations');
@@ -47,18 +54,8 @@ export const ChatProvider = ({ children }) => {
             }
 
             try {
-                const res = await axios.post(`/api/chats/conversations/${recipientId}/messages`, {
-                    content,
-                });
-
-                const msg = res.data;
-
-                setMessages((prev) => [
-                    ...prev.filter((m) => m.id !== tempMessage.id),
-                    msg,
-                ]);
-
-                socket.emit('new_message', msg);
+                // Send only via socket
+                socket.emit('send_message', { recipientId, content });
             } catch (err) {
                 console.error('Failed to send message:', err);
             }
@@ -76,7 +73,7 @@ export const ChatProvider = ({ children }) => {
             await loadConversations();
 
             setMessages((prev) => {
-                if (message.conversation_id === activeConversation?.id) {
+                if (message.conversation_id === activeConvIdRef.current) {
                     return [...prev, message];
                 }
                 return prev;
@@ -91,7 +88,7 @@ export const ChatProvider = ({ children }) => {
             socket.off('new_message', handleNewMessage);
             socket.disconnect();
         };
-    }, [token, activeConversation?.id, loadConversations]);
+    }, [token, loadConversations]);
 
     const contextValue = useMemo(
         () => ({

@@ -508,6 +508,7 @@ function buildSearchQueryWithCoordinates(params, applyFilters) {
     query += ` ORDER BY distance_km ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
   }
 
+  console.log('Search Query:', query);
   return { query, values };
 }
 
