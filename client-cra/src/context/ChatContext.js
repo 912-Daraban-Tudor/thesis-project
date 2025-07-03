@@ -47,6 +47,7 @@ export const ChatProvider = ({ children }) => {
                 sender_id: me,
                 content,
                 created_at: new Date().toISOString(),
+                temp: true,
             };
 
             if (activeConversation?.id) {
@@ -54,7 +55,6 @@ export const ChatProvider = ({ children }) => {
             }
 
             try {
-                // Send only via socket
                 socket.emit('send_message', { recipientId, content });
             } catch (err) {
                 console.error('Failed to send message:', err);
@@ -73,10 +73,21 @@ export const ChatProvider = ({ children }) => {
             await loadConversations();
 
             setMessages((prev) => {
+                const filtered = prev.filter(
+                    (m) =>
+                        !(
+                            m.temp &&
+                            m.content === message.content &&
+                            m.sender_id === message.sender_id &&
+                            m.conversation_id === message.conversation_id
+                        )
+                );
+
                 if (message.conversation_id === activeConvIdRef.current) {
-                    return [...prev, message];
+                    return [...filtered, message];
                 }
-                return prev;
+
+                return filtered;
             });
 
             setHasUnread(true);
