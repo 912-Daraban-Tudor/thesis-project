@@ -137,7 +137,11 @@ function TopNavBar() {
               }}
             >
               {countApartmentFilters > 0 ? (
-                <Badge badgeContent={countApartmentFilters} color="secondary">
+                <Badge
+                  badgeContent={countApartmentFilters}
+                  color="secondary"
+                  sx={{ zIndex: 1400, '& .MuiBadge-badge': { zIndex: 1400 } }}
+                >
                   <Button
                     variant={filterMode === 'apartment' ? 'contained' : 'outlined'}
                     color="primary"
@@ -145,7 +149,7 @@ function TopNavBar() {
                     onClick={() => openDrawer('apartment')}
                     sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
                   >
-                    <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Apartment Filters</Box>
+                    <Box sx={{ display: 'inline' }}>Apartment Filters</Box>
                   </Button>
                 </Badge>
               ) : (
@@ -161,13 +165,17 @@ function TopNavBar() {
               )}
 
               {countTransportFilters > 0 ? (
-                <Badge badgeContent={countTransportFilters} color="secondary">
+                <Badge
+                  badgeContent={countTransportFilters}
+                  color="secondary"
+                  sx={{ zIndex: 1400, '& .MuiBadge-badge': { zIndex: 1400 } }}
+                >
                   <Button
                     variant={filterMode === 'transport' ? 'contained' : 'outlined'}
                     color="primary"
                     startIcon={<DirectionsBusIcon />}
                     onClick={() => openDrawer('transport')}
-                    sx={{ minWidth: 0, px: { xs: 1, sm: 2 } }}
+                    sx={{ minWidth: 0, zIndex: 1400, '& .MuiBadge-badge': { zIndex: 1400 }, px: { xs: 1, sm: 2 } }}
                   >
                     <Box sx={{ display: { xs: 'none', sm: 'inline' } }}>Transport Filters</Box>
                   </Button>
